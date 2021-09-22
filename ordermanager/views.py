@@ -194,7 +194,7 @@ def order_modify(request, order_id):
     else:
         customerform = CustomerForm(instance=order.customer)
         orderform = OrderForm(instance=order)
-        product_name = Product.objects.get(pk=order_id).name_kr
+        product_name = order.product.name_kr
     context = {'order': order, 'customerform': customerform, 'orderform': orderform, 'productdb': productdb, 'product_name': product_name}  # 'customerdb': customerdb, 제외
     return render(request, 'ordermanager/order_form.html', context)
 
