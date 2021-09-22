@@ -435,7 +435,7 @@ def bill_detail(request):
             order_list_firstday = order_list.last().order_date
             order_list_lastday = order_list.first().order_date
             order_list_diffday = order_list_lastday - order_list_firstday
-            if order_list_diffday < 1:
+            if order_list_diffday < datetime(0, 0, 1):
                 order_list_diffday = 1
             start_day = order_list_firstday.date()
             for i in range(order_list_diffday.days):
