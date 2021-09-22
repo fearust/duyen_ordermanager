@@ -168,20 +168,24 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for key, value in benefit_byproduct_list.items %}
-                    <tr class="align-middle" style="text-align: center;">
-                        <td>{{ key }}</td>
-                        {% for v in value %}
+                {% if benefit_all_list %}
+                    {% for key, value in benefit_byproduct_list.items %}
+                        <tr class="align-middle" style="text-align: center;">
+                            <td>{{ key }}</td>
+                            {% for v in value %}
+                                <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tr class="align-middle table-warning" style="text-align: center; font-weight: bold">
+                        <td>합계</td>
+                        {% for v in benefit_all_list %}
                             <td>{{ v }}</td>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-                <tr class="align-middle table-warning" style="text-align: center; font-weight: bold">
-                    <td>합계</td>
-                    {% for v in benefit_all_list %}
-                        <td>{{ v }}</td>
-                    {% endfor %}
-                </tr>
+                {% else %}
+                    <tr><td colspan="5">주문이 없습니다.</td></tr>
+                {% endif %}
                 </tbody>
             </table>
 
@@ -196,20 +200,24 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for key, value in benefit_bydays_list.items %}
-                    <tr class="align-middle" style="text-align: center">
-                        <td>{{ key|date:"y/m/d" }}</td>
-                        {% for v in value %}
+                {% if benefit_all_list %}
+                    {% for key, value in benefit_bydays_list.items %}
+                        <tr class="align-middle" style="text-align: center">
+                            <td>{{ key|date:"y/m/d" }}</td>
+                            {% for v in value %}
+                                <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tr class="align-middle table-warning" style="text-align: center; font-weight: bold">
+                        <td>합계</td>
+                        {% for v in benefit_all_list %}
                             <td>{{ v }}</td>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-                <tr class="align-middle table-warning" style="text-align: center; font-weight: bold">
-                    <td>합계</td>
-                    {% for v in benefit_all_list %}
-                        <td>{{ v }}</td>
-                    {% endfor %}
-                </tr>
+                {% else %}
+                    <tr><td colspan="5">주문이 없습니다.</td></tr>
+                {% endif %}
                 </tbody>
             </table>
 
@@ -254,7 +262,7 @@
             {% endfor %}
         {% else %}
             <tr>
-                <td colspan="4">주문이 없습니다.</td>
+                <td colspan="9">주문이 없습니다.</td>
             </tr>
         {% endif %}
         </tbody>
