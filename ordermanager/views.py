@@ -406,49 +406,51 @@ def bill_detail(request):
     if check_blacklist == '1':
         order_list = order_list.filter(Q(customer__blacklist=True)).distinct()
 
-
     benefit_byproduct_list = {}
-    for product in Product.objects.all():
-        try:
-            byproduct = order_list.filter(product__name_kr__icontains=product.name_kr)
-            byproduct_count = list(byproduct.aggregate(Count('pk')).values())[0]
-            byproduct_buying_sum = list(byproduct.aggregate(Sum('buying_price')).values())[0]
-            byproduct_selling_sum = list(byproduct.aggregate(Sum('selling_price')).values())[0]
-            byproduct_benefit_sum = byproduct_selling_sum - byproduct_buying_sum
-            if byproduct_count and byproduct_benefit_sum > 0:
-                benefit_byproduct_list[product.name_kr] = (byproduct_count, byproduct_buying_sum, byproduct_selling_sum, byproduct_benefit_sum)
-        except:
-            pass
-
     benefit_bydays_list = {}
     order_list_firstday = datetime.now()
     order_list_lastday = datetime.now()
+    benefit_all_list = []
+
     if order_list.exists():
-        order_list_firstday = order_list.last().order_date
-        order_list_lastday = order_list.first().order_date
-        order_list_diffday = order_list_lastday - order_list_firstday
-        start_day = order_list_firstday.date()
-        for i in range(order_list_diffday.days):
-            end_day = start_day + timedelta(days=1)
-            bydays = order_list.filter(Q(order_date__gte=start_day) & Q(order_date__lte=end_day))
+
+        for product in Product.objects.all():
             try:
-                bydays_count = list(bydays.aggregate(Count('pk')).values())[0]
-                bydays_buying_sum = list(bydays.aggregate(Sum('buying_price')).values())[0]
-                bydays_selling_sum = list(bydays.aggregate(Sum('selling_price')).values())[0]
-                bydays_benefit_sum = bydays_selling_sum - bydays_buying_sum
-                if bydays_count and bydays_benefit_sum > 0:
-                    benefit_bydays_list[start_day] = (bydays_count, bydays_buying_sum, bydays_selling_sum, bydays_benefit_sum)
+                byproduct = order_list.filter(product__name_kr__icontains=product.name_kr)
+                byproduct_count = list(byproduct.aggregate(Count('pk')).values())[0]
+                byproduct_buying_sum = list(byproduct.aggregate(Sum('buying_price')).values())[0]
+                byproduct_selling_sum = list(byproduct.aggregate(Sum('selling_price')).values())[0]
+                byproduct_benefit_sum = byproduct_selling_sum - byproduct_buying_sum
+                if byproduct_count and byproduct_benefit_sum > 0:
+                    benefit_byproduct_list[product.name_kr] = (byproduct_count, byproduct_buying_sum, byproduct_selling_sum, byproduct_benefit_sum)
             except:
                 pass
-            start_day = end_day
 
-    benefit_all_list = []
-    all_order_count = list(order_list.aggregate(Count('pk')).values())[0]
-    buying_sum = list(order_list.aggregate(Sum('buying_price')).values())[0]
-    selling_sum = list(order_list.aggregate(Sum('selling_price')).values())[0]
-    benefit_sum = selling_sum - buying_sum
-    if selling_sum > 0:
-        benefit_all_list = [all_order_count, buying_sum, selling_sum, benefit_sum]
+        if order_list.exists():
+            order_list_firstday = order_list.last().order_date
+            order_list_lastday = order_list.first().order_date
+            order_list_diffday = order_list_lastday - order_list_firstday
+            start_day = order_list_firstday.date()
+            for i in range(order_list_diffday.days):
+                end_day = start_day + timedelta(days=1)
+                bydays = order_list.filter(Q(order_date__gte=start_day) & Q(order_date__lte=end_day))
+                try:
+                    bydays_count = list(bydays.aggregate(Count('pk')).values())[0]
+                    bydays_buying_sum = list(bydays.aggregate(Sum('buying_price')).values())[0]
+                    bydays_selling_sum = list(bydays.aggregate(Sum('selling_price')).values())[0]
+                    bydays_benefit_sum = bydays_selling_sum - bydays_buying_sum
+                    if bydays_count and bydays_benefit_sum > 0:
+                        benefit_bydays_list[start_day] = (bydays_count, bydays_buying_sum, bydays_selling_sum, bydays_benefit_sum)
+                except:
+                    pass
+                start_day = end_day
+
+        all_order_count = list(order_list.aggregate(Count('pk')).values())[0]
+        buying_sum = list(order_list.aggregate(Sum('buying_price')).values())[0]
+        selling_sum = list(order_list.aggregate(Sum('selling_price')).values())[0]
+        benefit_sum = selling_sum - buying_sum
+        if selling_sum > 0:
+            benefit_all_list = [all_order_count, buying_sum, selling_sum, benefit_sum]
 
     # 페이지당 오브젝트 갯수 설정
     object_per_page = 50
