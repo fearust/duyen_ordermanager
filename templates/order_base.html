@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{% static 'cssjs/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'cssjs/default.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'cssjs/simplemde/simplemde.min.css' %}" type="text/css" media="all" rel="stylesheet">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    {% include "navbar.html" %}
+    <div class="container">
+    <div class="row">
+    <div class="col-4"></div>
+        {% block content %}
+    {% endblock %}
+    </div>
+    </div>
+
+
+    <script src="{% static 'cssjs/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'cssjs/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'cssjs/simplemde/simplemde.init.js' %}"></script>
+    <script src="{% static 'cssjs/simplemde/simplemde.min.js' %}"></script>
+    <script>
+    var simplemde = new SimpleMDE({ element: $(".simplemde-box")[0] });
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function (){
+        $(".page-link").on('click', function (){
+            $("#page").val($(this).data("page"));
+            $("#searchForm").submit();
+        });
+
+        $("#btn_search").on('click', function (){
+            $("#kw").val($(".kw").val());
+            $("#page").val(1);
+            $("#searchForm").submit();
+        });
+    });
+    </script>
+    {% block script %}
+    {% endblock %}
+</body>
+</html>

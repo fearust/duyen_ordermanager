@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% load imagekit %}
+
+{% block title %}
+주문 요약
+{% endblock %}
+{% block content %}
+
+    <div class="row row-cols-1 row-cols-sm-1 row-cols-md-1 pt-2 bg-light">
+        <div class="col pb-2">
+            <div class="input-group input-group-sm pb-1">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-phone" style="font-size: 1.2em"></i></span>
+                <input class="form-control customer_phone" list="customerPhoneOption" placeholder="주문자 전화번호" value="{{ customer_phone|default_if_none:'' }}">
+                <datalist id="customerPhoneOption">
+                    {% for choice in customerdb %}
+                        <option value="{{ choice.phone }}">
+                    {% endfor %}
+                </datalist>
+            <span class="input-group-text" id="addon-wrapping"><i class="las la-user" style="font-size: 1.2em"></i></span>
+                <input class="form-control customer_name" list="customerNameOption" placeholder="주문자 이름" value="{{ customer_name|default_if_none:'' }}">
+                <datalist id="customerNameOption">
+                    {% for choice in customerdb %}
+                        <option value="{{ choice.name }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="input-group input-group-sm pb-1">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-boxes" style="font-size: 1.2em"></i></span>
+                <input class="form-control product_nickname_kr" list="productOptions" placeholder="제품명" value="{{ product_nickname_kr|default_if_none:'' }}">
+                <datalist id="productOptions">
+                    {% for choice in productdb %}
+                        <option value="{{ choice.nickname_kr }}">
+                    {% endfor %}
+                </datalist>
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-user-astronaut" style="font-size: 1.2em"></i></span>
+                <input class="form-control order_receptionist" list="receptionistOptions" placeholder="접수자" value="{{ order_receptionist|default_if_none:'' }}">
+                <datalist id="receptionistOptions">
+                    {% for choice in userdb %}
+                        <option value="{{ choice.username }}">
+                    {% endfor %}
+                </datalist>
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-user-tag" style="font-size: 1.2em"></i></span>
+                <input class="form-control order_actor" list="actorOptions" placeholder="대행자" value="{{ order_actor|default_if_none:'' }}">
+                <datalist id="actorOptions">
+                    {% for choice in userdb %}
+                        <option value="{{ choice.username }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+
+            <div class="input-group input-group-sm pb-1">
+                <input class="form-control Qstart" id="startdate" type="text" placeholder="검색 시작일" value="{{ Qstart|default_if_none:'' }}">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-hourglass-start" style="font-size: 1.2em"></i><i class="las la-arrow-right"></i><i class="las la-hourglass-end" style="font-size: 1.2em"></i></span>
+                <input class="form-control Qend" id="enddate" type="text" placeholder="검색 마감일" value="{{ Qend|default_if_none:'' }}">
+            </div>
+
+            <div class="input-group input-group-sm">
+                <input class="form-control pkstart" id="pkstart0" type="text" placeholder="검색 시작번호" value="{{ pkstart|default_if_none:'' }}">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-sort-numeric-down" style="font-size: 1.2em"></i><i class="las la-arrow-right"></i><i class="las la-sort-numeric-up-alt" style="font-size: 1.2em"></i></span>
+                <input class="form-control pkend" id="pkend0" type="text" placeholder="검색 끝번호" value="{{ pkend|default_if_none:'' }}">
+            </div>
+        </div>
+
+        <div class="col pb-1 mb-2">
+            <div class="row row-cols-1 row-cols-sm-1 row-cols-xl-3 d-flex justify-content-between">
+                <div class="col flex-fill my-1">
+                    <button type="button" class="btn btn-sm btn-secondary me-1" disabled>입금</button>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input check_confirm_transit" type="radio" name="check_confirm_transit0" id="check_confirm_transit1" value=2>
+                        <label class="form-check-label" for="check_confirm_transit1">모두</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input check_confirm_transit" type="radio" name="check_confirm_transit0" id="check_confirm_transit2" value=1>
+                        <label class="form-check-label" for="check_confirm_transit2">입금완</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input check_confirm_transit" type="radio" name="check_confirm_transit0" id="check_confirm_transit3" value=0>
+                        <label class="form-check-label" for="check_confirm_transit3">미입금</label>
+                    </div>
+                </div>
+                <div class="col flex-fill my-1">
+                    <button type="button" class="btn btn-sm btn-secondary me-1" disabled>상태</button>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input check_confirm_cancel" type="checkbox" name="check_confirm_cancel0" id="check_confirm_cancel0" value=1>
+                        <label class="form-check-label" for="check_confirm_cancel0">취소건</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input check_confirm_watch" type="checkbox" name="check_confirm_watch0" id="check_confirm_watch0" value=1>
+                        <label class="form-check-label" for="check_confirm_watch0">유의건</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input check_blacklist" type="checkbox" name="check_blacklist0" id="check_blacklist0" value=1>
+                        <label class="form-check-label" for="check_blacklist0">Blacklist</label>
+                    </div>
+                </div>
+                <div class="col flex-fill btn-toolbar justify-content-end my-1">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-secondary" type="button" id="btn_search">결산</button>
+                        <button class="btn btn-outline-secondary" type="button" id="btn_reset"><a href={% url 'ordermanager:bill_detail' %}>초기화</a></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div style="text-align: center; font-size: 1.6em;"><b>결산</b></div>
+            <div style="text-align: right;"><a href="">다운로드</a></div>
+            <div style="text-align: left;">21/08/05-21/08/05의 결산내역입니다.</div>
+            <table class="table table-striped table-hover table-sm align-middle con_txt1">
+                <thead>
+                <tr style="text-align: center" class="table-dark">
+                    <th scope="col">항목</th>
+                    <th scope="col">주문건수</th>
+                    <th scope="col">구입총액</th>
+                    <th scope="col">판매총액</th>
+                    <th scope="col">수익</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="align-middle" style="text-align: center;">
+                    <!-- 체크박스 -->
+                    <td>좋은상품(좋상)</td>
+                    <!-- 주문번호/입금확인,취소 -->
+                    <td>
+                        301
+                    </td>
+                    <!-- 주문정보 -->
+                    <td>
+                        3,000
+                    </td>
+                    <!-- 주문일자/연락처/주문수정 -->
+                    <td>
+                        12,000
+                    </td>
+                    <td>
+                        9,000
+                    </td>
+                </tr>
+                <tr class="align-middle table-warning" style="text-align: center; font-weight: bold">
+                    <td>합계</td>
+                    <td>301</td>
+                    <td>3,000</td>
+                    <td>12,000</td>
+                    <td>9,000</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-striped table-hover table-sm align-middle con_txt1">
+                <thead>
+                <tr style="text-align: center" class="table-dark">
+                    <th scope="col">일자</th>
+                    <th scope="col">주문건수</th>
+                    <th scope="col">구입총액</th>
+                    <th scope="col">판매총액</th>
+                    <th scope="col">수익</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="align-middle" style="text-align: center">
+                    <td>21/08/05</td>
+                    <td>301</td>
+                    <td>3,000</td>
+                    <td>12,000</td>
+                    <td>9,000</td>
+                </tr>
+                <tr class="align-middle table-warning" style="text-align: center; font-weight: bold">
+                    <td>21/08/05</td>
+                    <td>301</td>
+                    <td>3,000</td>
+                    <td>12,000</td>
+                    <td>9,000</td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+<!-- 페이지 버튼 -->
+{% include "ordermanager/ordernav.html" %}
+
+{% if customer_name or customer_phone or product_nickname_kr or order_receptionist or order_actor or Qstart or Qend or pkstart or pkend or check_confirm_transit or check_confirm_cancel or check_confirm_watch or check_blacklist %}
+    <span id="searched">다음에 대한 검색결과:</span>
+{% endif %}
+{% if customer_name %}
+    <div class="badge bg-secondary mx-1">{{ customer_name }} </div>
+{% endif %}
+{% if customer_phone %}
+    <div class="badge bg-secondary mx-1">{{ customer_phone }} </div>
+{% endif %}
+{% if product_nickname_kr %}
+    <div class="badge bg-secondary mx-1">{{ product_nickname_kr }} </div>
+{% endif %}
+{% if order_receptionist %}
+    <div class="badge bg-secondary mx-1">{{ order_receptionist }} </div>
+{% endif %}
+{% if order_actor %}
+    <div class="badge bg-secondary mx-1">{{ order_actor }} </div>
+{% endif %}
+{% if Qstart %}
+    <div class="badge bg-secondary mx-1">{{ Qstart }}부터 </div>
+{% endif %}
+{% if Qend %}
+    <div class="badge bg-secondary mx-1">{{ Qend }}까지 </div>
+{% endif %}
+{% if pkstart %}
+    <div class="badge bg-secondary mx-1">{{ pkstart }}번부터 </div>
+{% endif %}
+{% if pkend %}
+    <div class="badge bg-secondary mx-1">{{ pkend }}번까지 </div>
+{% endif %}
+{% if check_confirm_transit == '2' %}
+    <div class="badge bg-secondary mx-1">입금항목 전부 </div>
+{% elif check_confirm_transit == '1' %}
+    <div class="badge bg-secondary mx-1">입금완료 항목 </div>
+{% elif check_confirm_transit == '0' %}
+    <div class="badge bg-secondary mx-1">미입금 항목 </div>
+{% endif %}
+{% if check_confirm_cancel %}
+    <div class="badge bg-secondary mx-1">주문 취소건 </div>
+{% endif %}
+{% if check_confirm_watch %}
+    <div class="badge bg-secondary mx-1">유의항목 </div>
+{% endif %}
+{% if check_blacklist %}
+    <div class="badge bg-secondary mx-1">블랙리스트 </div>
+{% endif %}
+
+
+<table class="table table-hover table-sm align-middle con_txt1">
+<thead>
+    <tr style="text-align: center">
+        <th scope="col">no.</th>
+        <th scope="col">주문자</th>
+        <th scope="col">항목</th>
+        <th scope="col">연락처</th>
+        <th scope="col">주소</th>
+        <th scope="col">수량</th>
+        <th scope="col">사이즈</th>
+        <th scope="col">구입가</th>
+        <th scope="col">판매가</th>
+    </tr>
+</thead>
+<tbody>
+    {% if order_list %}
+        {% for order in order_list %}
+        <tr class="align-middle" style="text-align: center;">
+            <td>{{ order.id }}</td>
+            <td>{{ order.customer.name }}</td>
+            <td>{{ order.product.nickname_kr }}</td>
+            <td>{{ order.customer.phone }}</td>
+            <td>{{ order.order_addr }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.size }}</td>
+            <td>
+                {% for x in order.actor_set.all|dictsortreversed:"actor_price" %}
+                    {{ x.actor_price }}
+                {% endfor %}
+            </td>
+            <td>
+                {% for y in order.actor_set.all|dictsortreversed:"actor_price" %}
+                    {{ y.selling_price }}
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr>
+            <td colspan="4">주문이 없습니다.</td>
+        </tr>
+    {% endif %}
+</tbody>
+</table>
+
+<!-- 페이지 버튼 -->
+{% include "ordermanager/ordernav.html" %}
+
+<!-- 검색과 페이징 -->
+<form id="searchForm" method="get" action="{% url 'index' %}">
+    <input type="hidden" id="customer_phone" name="customer_phone" value="{{ customer_phone|default_if_none:'' }}">
+    <input type="hidden" id="customer_name" name="customer_name" value="{{ customer_name|default_if_none:'' }}">
+    <input type="hidden" id="product_nickname_kr" name="product_nickname_kr" value="{{ product_nickname_kr|default_if_none:'' }}">
+    <input type="hidden" id="order_receptionist" name="order_receptionist" value="{{ order_receptionist|default_if_none:'' }}">
+    <input type="hidden" id="order_actor" name="order_actor" value="{{ order_actor|default_if_none:'' }}">
+    <input type="hidden" id="Qstart" name="Qstart" value="{{ Qstart|default_if_none:'' }}">
+    <input type="hidden" id="Qend" name="Qend" value="{{ Qend|default_if_none:'' }}">
+    <input type="hidden" id="pkstart" name="pkstart" value="{{ pkstart|default_if_none:'' }}">
+    <input type="hidden" id="pkend" name="pkend" value="{{ pkend|default_if_none:'' }}">
+    <input type="hidden" id="check_confirm_transit" name="check_confirm_transit" value="{{ check_confirm_transit }}">
+    <input type="hidden" id="check_confirm_cancel" name="check_confirm_cancel" value="{{ check_confirm_cancel }}">
+    <input type="hidden" id="check_confirm_watch" name="check_confirm_watch" value="{{ check_confirm_watch }}">
+    <input type="hidden" id="check_blacklist" name="check_blacklist" value="{{ check_blacklist }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+</form>
+{% endblock %}

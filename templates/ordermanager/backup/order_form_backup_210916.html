@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- 오류메시지 -->
+        {% if customerform.errors %}
+            <div class="alert alert-danger" role="alert">
+            {% for field in customerform %}
+                {% if field.errors %}
+                <strong>{{ field.label }}</strong>
+                {{ field.errors }}
+                {% endif %}
+            {% endfor %}
+            </div>
+        {% endif %}
+        {% if orderform.errors %}
+            <div class="alert alert-danger" role="alert">
+            {% for field in orderform %}
+                {% if field.errors %}
+                <strong>{{ field.label }}</strong>
+                {{ field.errors }}
+                {% endif %}
+            {% endfor %}
+            </div>
+        {% endif %}
+
+
+        <!-- 주문자 정보 -->
+        {% if order.orderimage_set.count > 0 %}
+            <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-4 mb-3">
+            <div class="accordion" id="accordionExample">
+                {% for image in order.orderimage_set.all  %}
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="heading{{ forloop.counter }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                                <i class="las la-image" style="font-size: 32px"></i><br>
+                                <b>&emsp;이미지 #{{ forloop.counter }}</b>
+                            </button>
+                        </div>
+                        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <a href="{{ image.image.url }}" target="_blank"><img src="{{ image.image.url }}" width="100%"></a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            </div>
+
+            <div class="col-12 col-sm-12 col-md-6 col-lg-8">
+        {% endif %}
+
+        <div id="Customerinfo">
+            <div class="row g-3 border-bottom pb-3 mb-3">
+                <h5><strong>| 주문자 정보</strong></h5>
+                <div class="col-8 col-md-6">
+                    <div class="form-floating">
+                        <input class="form-control" list="customerOptions" name="phone" id="phone" placeholder="전화번호" value="{{ customerform.phone.value|default_if_none:'' }}">
+                        <div class="valid-feedback">기존 회원정보가 있습니다. 정보를 불러옵니다. 불러온 항목을 수정하면 새로운 정보로 덮어쓰기 됩니다.</div>
+                        <div class="invalid-feedback">기존 회원정보가 없습니다. 정보를 입력해주세요.</div>
+                        <label for="phone">전화번호</label>
+                        <datalist id="customerOptions">
+                            {% for choice in customerdb %}
+                                <option value="{{ choice.phone }}">{{ choice.name }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                </div>
+                <div class="col-4 col-md-6">
+                    <button type="button" class="btn btn-secondary" onclick="phone_find()" style="padding: 17px 12px;">회원검색</button>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" name="name" id="name" placeholder="주문자 이름" value="{{ customerform.name.value|default_if_none:'' }}">
+                        <label for="name">주문자 이름</label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" name="facebook_url" id="facebook_url" placeholder="페이스북 프로필 링크" value="{{ customerform.facebook_url.value|default_if_none:'' }}">
+                        <label for="facebook_url">페이스북 프로필 링크</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 border-bottom pb-3 mb-3">
+                <h6>주소</h6>
+                <div class="col-6 col-md-4">
+                    <input type="text" class="form-control" name="postcode" id="postcode" placeholder="우편번호" value="{{ customerform.postcode.value|default_if_none:'' }}" disabled readonly>
+                </div>
+                <div class="col-6 col-md-4">
+                    <button type="button" class="btn btn-secondary" onclick="sample3_execDaumPostcode()">주소찾기</button>
+                </div>
+                <div class="col-12">
+                    <input type="text" class="form-control" name="addr" id="addr" placeholder="주소" value="{{ customerform.addr.value|default_if_none:'' }}" disabled readonly>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <input type="text" class="form-control" name="detail_addr" id="detail_addr" placeholder="상세주소" value="{{ customerform.detail_addr.value|default_if_none:'' }}">
+                </div>
+                <div class="col-12 col-lg-6">
+                    <input type="text" class="form-control" name="extra_addr" id="extra_addr" placeholder="참고항목" value="{{ customerform.extra_addr.value|default_if_none:'' }}" disabled readonly>
+                </div>
+                <div class="col-12 col-lg-12">
+                    <input type="text" class="form-control" name="order_addr" id="order_addr" placeholder="주소 직접 입력" value="{{ orderform.order_addr.value|default_if_none:'' }}">
+                </div>
+                <div id="addrwrap" class="mt-3 px-0" style="display:none;border:1px solid #ced4da;width:500px;height:300px;margin:5px 8px;position:relative;border-radius:.25rem">
+                    <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
+                </div>
+
+            </div>
+            <div class="row g-3 border-bottom pb-3 mb-3">
+                <h6>기타 정보</h6>
+                <div class="col-12 col-lg-4">
+                    <input type="text" class="form-control" name="bank_depositor" id="bank_depositor" placeholder="입금자(별도일 경우)" value="{{ customerform.bank_depositor.value|default_if_none:'' }}">
+                </div>
+                <div class="col-12 col-lg-8">
+                    <input type="text" class="form-control" name="bank_refund" id="bank_refund" placeholder="환불계좌(옵션)" value="{{ customerform.bank_refund.value|default_if_none:'' }}">
+                </div>
+                <div class="col-12">
+                    <input type="text" class="form-control" name="description" id="description" placeholder="주문자 관련 메모" value="{{ customerform.description.value|default_if_none:'' }}">
+                </div>
+                <div class="col-12" style="display: none">
+                    <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="phoneisexist" id="phoneisexist" value=1 disabled>
+                    <label class="form-check-label" for="phoneisexist">정보있음</label>
+                    </div>
+                    <input type="text" class="form-control" name="customerid" id="customerid" placeholder="pk정보" value="" disabled>
+                </div>
+            </div>
+        </div>
+    {% if order.orderimage_set.count > 0 %}
+        </div>
+    {% endif %}
+
+        <!-- 주문정보 -->
+        <div class="row g-3 border-bottom pb-3 my-3">
+            <h5><strong>| 주문 정보</strong></h5>
+            <div class="col-12">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="confirm_transit" id="confirm_transit" value=1 {% if orderform.confirm_transit.value %} checked {% endif %}>
+                    <label class="form-check-label" for="confirm_transit">입금확인</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="confirm_cancel" id="confirm_cancel" value=1 {% if orderform.confirm_cancel.value %} checked {% endif %}>
+                    <label class="form-check-label" for="confirm_cancel">주문취소</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="confirm_watch" id="confirm_watch" value=1 {% if orderform.confirm_watch.value %} checked {% endif %}>
+                    <label class="form-check-label" for="confirm_watch">유의항목</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input class="form-control" list="productOptions" name="product" id="product" placeholder="제품명" value="{{ orderform.product.value|default_if_none:'' }}" required >
+                    <label for="product">제품명</label>
+                    <datalist id="productOptions">
+                        {% for choice in productdb %}
+                            <option value="{{ choice.id }}">{{ choice.nickname_kr }}</option>
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-12">
+                    <input type="text" class="form-control-plaintext" name="productid" id="productid" value="">
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="quantity" id="quantity" placeholder="개수" value="{{ orderform.quantity.value|default_if_none:'1' }}">
+                    <label for="quantity">개수</label>
+                </div>
+            </div>
+            <div class="col-md-4 col-8">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="size" id="size" placeholder="사이즈" value="{{ orderform.size.value|default_if_none:'' }}">
+                    <label for="size">사이즈</label>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 border-bottom pb-3 mb-3">
+            <h6>참고정보</h6>
+            <div class="col-12">
+                <input type="file" class="form-control" name="imgs" id="imgs" placeholder="이미지파일" multiple>
+            </div>
+            <div class="col-12">
+                <textarea class="form-control" name="receptionist_memo" id="receptionist_memo" rows="5">{{ orderform.receptionist_memo.value|default_if_none:'' }}</textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-primary mb-5">
+            <i class="las la-save" style="font-size: 32px;"></i><br>저장하기
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    // 우편번호 찾기 찾기 화면을 넣을 element
+    var element_wrap = document.getElementById('addrwrap');
+
+    function foldDaumPostcode() {
+        // iframe을 넣은 element를 안보이게 한다.
+        element_wrap.style.display = 'none';
+    }
+
+    function sample3_execDaumPostcode() {
+        // 현재 scroll 위치를 저장해놓는다.
+        var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
+
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("extra_addr").value = extraAddr;
+
+                } else {
+                    document.getElementById("extra_addr").value = '';
+                }
+
+                let detail_addr = document.getElementById('detail_addr').value;
+                if(detail_addr.length > 0){
+                    detail_addr = ''.concat(' ', detail_addr)
+                }
+
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('postcode').value = data.zonecode;
+                document.getElementById("addr").value = addr;
+                document.getElementById("order_addr").value = ''.concat(addr, detail_addr, extraAddr, ' 우: ', data.zonecode)
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById("detail_addr").focus();
+
+
+
+                // iframe을 넣은 element를 안보이게 한다.
+                // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
+                element_wrap.style.display = 'none';
+
+                // 우편번호 찾기 화면이 보이기 이전으로 scroll 위치를 되돌린다.
+                document.body.scrollTop = currentScroll;
+            },
+            // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
+
+            onresize : function(size) {
+                element_wrap.style.height = (size.height+10)+'px';
+            },
+            width : '100%',
+            height : '100%'
+        }).embed(element_wrap);
+
+        // iframe을 넣은 element를 보이게 한다.
+        element_wrap.style.display = 'block';
+    }
+</script>
+<script>
+    function phone_find() {
+        var phone_value = $("#phone").val();
+
+        document.getElementById('name').value = '';
+        document.getElementById('facebook_url').value = '';
+        document.getElementById('postcode').value = '';
+        document.getElementById('addr').value = '';
+        document.getElementById('detail_addr').value = '';
+        document.getElementById('extra_addr').value = '';
+        document.getElementById('bank_depositor').value = '';
+        document.getElementById('bank_refund').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('customerid').value = '';
+
+        $.get('/manage/phonefind/', {phone: phone_value}, function(data) {
+            phone_getdata = JSON.parse(data);
+            if (phone_getdata[0]) {
+                $("#phone").addClass('is-valid');
+                $("#phone").removeClass('is-invalid');
+                $("#phoneisexist").attr("checked", true);
+                document.getElementById('name').value = phone_getdata[0].name;
+                document.getElementById('facebook_url').value = phone_getdata[0].facebook_url;
+                document.getElementById('postcode').value = phone_getdata[0].postcode;
+                document.getElementById('addr').value = phone_getdata[0].addr;
+                document.getElementById('detail_addr').value = phone_getdata[0].detail_addr;
+                document.getElementById('extra_addr').value = phone_getdata[0].extra_addr;
+                document.getElementById('bank_depositor').value = phone_getdata[0].bank_depositor;
+                document.getElementById('bank_refund').value = phone_getdata[0].bank_refund;
+                document.getElementById('description').value = phone_getdata[0].description;
+                document.getElementById('customerid').value = phone_getdata[0].id;
+            } else {
+                $("#phone").addClass('is-invalid');
+                $("#phone").removeClass('is-valid');
+                $("#phoneisexist").attr("checked", false);
+            }
+        });
+    }
+</script>
+<script>
+const input = document.getElementById('detail_addr')
+const input2 = document.getElementById('addr')
+
+input.addEventListener('input', updateValue);
+input2.addEventListener('input', updateValue);
+function updateValue(e) {
+    var addr = document.getElementById("addr").value;
+    var postcode = document.getElementById('postcode').value;
+    var extra_addr = document.getElementById("extra_addr").value;
+    var detail_addr = document.getElementById('detail_addr').value;
+    if(addr.length > 0) {addr = ''.concat(addr, " ");}
+    if(postcode.length > 0) {postcode = ''.concat(" 우: ", postcode);}
+    document.getElementById("order_addr").value = ''.concat(addr, detail_addr, extra_addr, postcode);
+}
+</script>
+<script>
+const productSearch = document.getElementById('product')
+productSearch.addEventListener('input', updateProduct);
+$(document).ready(function(){updateProduct()});
+
+function updateProduct(e) {
+    const product_value = document.getElementById('product').value;
+    document.getElementById('productid').value = '';
+
+    if(product_value) {
+        $.get('/manage/productfind/', {product: product_value}, function(data) {
+            const product_getdata = JSON.parse(data);
+            if (product_getdata[0]) {
+                const productidnum = product_getdata[0].id;
+                const namekr = product_getdata[0].name_kr;
+                const nicknamekr = product_getdata[0].nickname_kr;
+                document.getElementById('productid').value = ''.concat(productidnum, "번 상품: ", nicknamekr, " (", namekr, ")");
+                console.log(product_getdata[0])
+            } else {
+                document.getElementById('productid').value = '';
+            }
+        });
+    }
+}
+</script>
+
+{% endblock %}

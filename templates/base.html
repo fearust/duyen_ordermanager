@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{% static 'cssjs/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'cssjs/default.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'cssjs/simplemde/simplemde.min.css' %}" type="text/css" media="all" rel="stylesheet">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    {% include "navbar.html" %}
+    <div class="container">
+    {% block content %}
+    {% endblock %}
+    </div>
+</body>
+
+    <link href="{% static 'cssjs/jquery.datetimepicker.min.css' %}" type="text/css" rel="stylesheet">
+    <script src="{% static 'cssjs/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'cssjs/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'cssjs/simplemde/simplemde.init.js' %}"></script>
+    <script src="{% static 'cssjs/simplemde/simplemde.min.js' %}"></script>
+    <script src="{% static 'cssjs/jquery.datetimepicker.full.min.js' %}"></script>
+    <script>
+    var simplemde = new SimpleMDE({ element: $(".simplemde-box")[0] });
+    </script>
+    <script>
+        jQuery(function(){
+            $.datetimepicker.setLocale('ko');
+            jQuery('#startdate').datetimepicker({
+                onShow:function( ct ){
+                    this.setOptions({
+                        maxDate:jQuery('#enddate').val()?jQuery('#enddate').val():false
+                    })
+                },
+                timepicker:true,
+                format:'Y-m-d H:i'
+            });
+            jQuery('#enddate').datetimepicker({
+                onShow:function( ct ){
+                    this.setOptions({
+                        minDate:jQuery('#startdate').val()?jQuery('#startdate').val():false
+                    })
+                },
+                maxDate:0,
+                timepicker:true,
+                format:'Y-m-d H:i'
+            });
+        });
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $(".page-link").on('click', function () {
+            $("#page").val($(this).data("page"));
+            $("#searchForm").submit();
+        });
+
+        $("#btn_search").on('click', function () {
+            $("#customer_name").val($(".customer_name").val());
+            $("#customer_phone").val($(".customer_phone").val());
+            $("#product_nickname_kr").val($(".product_nickname_kr").val());
+            $("#order_receptionist").val($(".order_receptionist").val());
+            $("#order_actor").val($(".order_actor").val());
+            $("#Qstart").val($(".Qstart").val());
+            $("#Qend").val($(".Qend").val());
+            $("#pkstart").val($(".pkstart").val());
+            $("#pkend").val($(".pkend").val());
+            const transitNodeList = document.getElementsByName('check_confirm_transit0');
+            const cTransitCancel = document.getElementsByName('check_confirm_transit_cancel0');
+            const cTransit2 = document.getElementById('check_confirm_transit2');
+            const cTransit3 = document.getElementById('check_confirm_transit3');
+            transitNodeList.forEach((node) => {
+                if(node.checked) {
+                    document.getElementById('check_confirm_transit').value = node.value;
+                }
+            })
+            cTransitCancel.forEach((node) => {
+                if(node.checked) {
+                    if(cTransit2.checked || cTransit3.checked){
+                        document.getElementById('check_confirm_transit_cancel').value = node.value;
+                    } else {
+                        document.getElementById('check_confirm_transit_cancel').value = '';
+                    }
+                } else {
+                    document.getElementById('check_confirm_transit_cancel').value = '';
+                }
+            })
+            const cCancel = document.getElementsByName('check_confirm_cancel0');
+            const cWatch = document.getElementsByName('check_confirm_watch0');
+            const cBlack = document.getElementsByName('check_blacklist0');
+            cCancel.forEach((node) => {
+                if(node.checked) {
+                    document.getElementById('check_confirm_cancel').value = node.value;
+                } else {
+                    document.getElementById('check_confirm_cancel').value = '';
+                }
+            })
+            cWatch.forEach((node) => {
+                if(node.checked) {
+                    document.getElementById('check_confirm_watch').value = node.value;
+                } else {
+                    document.getElementById('check_confirm_watch').value = '';
+                }
+            })
+            cBlack.forEach((node) => {
+                if(node.checked) {
+                    document.getElementById('check_blacklist').value = node.value;
+                } else {
+                    document.getElementById('check_blacklist').value = '';
+                }
+            })
+            $("#page").val(1);
+            $("#searchForm").submit();
+        });
+
+        if (!document.getElementById('searched')) {
+            $("#btn_reset").addClass("disabled");
+            $("#btn_bill_csv").addClass("disabled");
+        } else {
+            $("#btn_reset").removeClass("disabled");
+            $("#btn_bill_csv").removeClass("disabled");
+        }
+    });
+
+    const transit_cancel_check = document.getElementById('check_confirm_transit_cancel0')
+    const cancel_check = document.getElementById('check_confirm_cancel0')
+
+    transit_cancel_check.addEventListener('change', cancelUncheck);
+    cancel_check.addEventListener('change', transitCancelChange);
+    function cancelUncheck(e) {
+        cancel_check.checked = false;
+    }
+    function transitCancelChange(e) {
+        transit_cancel_check.checked = false;
+    }
+    </script>
+
+    {% block script %}
+    {% endblock %}
+
+</html>

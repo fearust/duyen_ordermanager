@@ -1,0 +1,109 @@
+const order_modify_btn=document.getElementById("order_modify_btn");
+const facebook_btn=document.getElementById("facebook_btn");
+const do_transit=document.getElementById("do_transit");
+const do_watch=document.getElementById("do_watch");
+const do_cancel=document.getElementById("do_cancel");
+document.addEventListener("keydown", function(e) {
+    let key=e.which;
+    switch (key) {
+        case 65:          // A
+            do_transit.click();
+            break;
+        case 83:            // S
+            do_watch.click();
+            break;
+        case 68:            // D
+            do_cancel.click();
+            break;
+        case 81:            // Q
+            order_modify_btn.click();
+            break;
+        case 69:            // E
+            facebook_btn.click();
+            break;
+    }
+});
+
+const hidden_prev=document.getElementById("hidden_prev");
+const hidden_next=document.getElementById("hidden_next");
+const new_order_btn=document.getElementById("new_order_btn");
+document.addEventListener("keydown", function(e) {
+    let key=e.which;
+    switch (key) {
+        case 39:          //arrow right
+            hidden_next.click();
+            break;
+        case 37:         //arrow left
+            hidden_prev.click();
+            break;
+        case 81:         //Q
+            new_order_btn.click();
+            break;
+    }
+});
+
+const save_btn=document.getElementById("save_btn");
+document.addEventListener("keydown", function(e) {
+    let key=e.which;
+    switch (key) {
+        case 87:          // W
+            save_btn.click();
+            break;
+    }
+});
+
+<script>
+function readMultipleImage(input) {
+
+    const multipleContainer = document.getElementById("multiple-container")
+
+    // 인풋 태그에 파일들이 있는 경우
+    if(input.files) {
+        // 이미지 파일 검사 (생략)
+        console.log(input.files)
+
+        // 유사배열을 배열로 변환 (forEach문으로 처리하기 위해)
+        const fileArr = Array.from(input.files)
+        let $colDiv
+
+        fileArr.forEach((file, index) => {
+            const reader = new FileReader()
+
+            const $imgDiv = document.createElement("div")
+            const $img = document.createElement("img")
+            $img.classList.add("preview_image")
+
+            const $label = document.createElement("label")
+            $label.classList.add("preview_image-label")
+            $label.textContent = file.name
+
+            $imgDiv.appendChild($img)
+            $imgDiv.appendChild($label)
+
+            reader.onload = e => {
+                $img.src = e.target.result
+            }
+
+            // $imgDiv.style.width = (($img.naturalWidth) * 0.2) + "px"
+            // $imgDiv.style.height = (($img.naturalHeight) * 0.2) + "px"
+            console.log(file.name)
+                $colDiv = document.createElement("div")
+                $colDiv.classList.add("preview_column")
+                $colDiv.appendChild($imgDiv)
+                multipleContainer.appendChild($colDiv)
+
+            reader.readAsDataURL(file)
+        })
+
+    }
+}
+
+const inputMultipleImage = document.getElementById("imgs")
+inputMultipleImage.addEventListener("change", e => {
+    var el = document.getElementsByClassName('preview_column')
+    while (el.length>0){
+        el[0].parentNode.removeChild(el[0])
+    }
+    readMultipleImage(e.target)
+})
+</script>

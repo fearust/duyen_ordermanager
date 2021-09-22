@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load imagekit %}
+
+{% block title %}
+주문 리스트
+{% endblock %}
+
+<!-- <meta http-equiv="refresh" content="5"> -->
+
+{% block content %}
+
+    <div class="row row-cols-1 row-cols-sm-1 row-cols-md-1 pt-2 bg-light">
+        <div class="col pb-2">
+            <div class="input-group input-group-sm pb-1">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-phone" style="font-size: 1.2em"></i></span>
+                <input class="form-control customer_phone" placeholder="주문자 전화번호" value="{{ customer_phone|default_if_none:'' }}">
+            <span class="input-group-text" id="addon-wrapping"><i class="las la-user" style="font-size: 1.2em"></i></span>
+                <input class="form-control customer_name" placeholder="주문자 이름" value="{{ customer_name|default_if_none:'' }}">
+            </div>
+            <div class="input-group input-group-sm pb-1">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-boxes" style="font-size: 1.2em"></i></span>
+                <input class="form-control product_nickname_kr" list="productOptions" placeholder="제품명" value="{{ product_nickname_kr|default_if_none:'' }}">
+                <datalist id="productOptions">
+                    {% for choice in productdb %}
+                        <option value="{{ choice.nickname_kr }}">({{ choice.name_kr }})</option>
+                    {% endfor %}
+                </datalist>
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-user-astronaut" style="font-size: 1.2em"></i></span>
+                <input class="form-control order_receptionist" list="receptionistOptions" placeholder="접수자" value="{{ order_receptionist|default_if_none:'' }}">
+                <datalist id="receptionistOptions">
+                    {% for choice in userdb %}
+                        <option value="{{ choice.username }}">
+                    {% endfor %}
+                </datalist>
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-user-tag" style="font-size: 1.2em"></i></span>
+                <input class="form-control order_actor" list="actorOptions" placeholder="대행자" value="{{ order_actor|default_if_none:'' }}">
+                <datalist id="actorOptions">
+                    {% for choice in userdb %}
+                        <option value="{{ choice.username }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+
+            <div class="input-group input-group-sm pb-1">
+                <input class="form-control Qstart" id="startdate" type="text" placeholder="검색 시작일" value="{{ Qstart|default_if_none:'' }}">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-hourglass-start" style="font-size: 1.2em"></i><i class="las la-arrow-right"></i><i class="las la-hourglass-end" style="font-size: 1.2em"></i></span>
+                <input class="form-control Qend" id="enddate" type="text" placeholder="검색 마감일" value="{{ Qend|default_if_none:'' }}">
+            </div>
+
+            <div class="input-group input-group-sm">
+                <input class="form-control pkstart" id="pkstart0" type="text" placeholder="검색 시작번호" value="{{ pkstart|default_if_none:'' }}">
+                <span class="input-group-text" id="addon-wrapping"><i class="las la-sort-numeric-down" style="font-size: 1.2em"></i><i class="las la-arrow-right"></i><i class="las la-sort-numeric-up-alt" style="font-size: 1.2em"></i></span>
+                <input class="form-control pkend" id="pkend0" type="text" placeholder="검색 끝번호" value="{{ pkend|default_if_none:'' }}">
+            </div>
+        </div>
+
+        <div class="col mb-1">
+            <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-xl-3 d-flex justify-content-between">
+                <div class="col my-1 d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-secondary me-1" disabled>입금</button>
+                    <div style="padding: 3px 0 0 0;">
+                        <div class="form-check form-check-inline me-2">
+                            <input class="form-check-input check_confirm_transit" type="radio" name="check_confirm_transit0" id="check_confirm_transit1" value=2>
+                            <label class="form-check-label" for="check_confirm_transit1">모두</label>
+                        </div>
+                    </div>
+                    <div class="bg-secondary bg-opacity-25 rounded" style="padding: 3px 10px 0 10px;">
+                        <div class="form-check form-check-inline me-2">
+                            <input class="form-check-input check_confirm_transit" type="radio" name="check_confirm_transit0" id="check_confirm_transit2" value=1>
+                            <label class="form-check-label" for="check_confirm_transit2">입금완</label>
+                        </div>
+                        <div class="form-check form-check-inline me-2">
+                            <input class="form-check-input check_confirm_transit" type="radio" name="check_confirm_transit0" id="check_confirm_transit3" value=0>
+                            <label class="form-check-label" for="check_confirm_transit3">미입금</label>
+                        </div>
+                        <div class="form-check form-check-inline me-0">
+                            <input class="form-check-input check_confirm_transit_cancel" type="checkbox" name="check_confirm_transit_cancel0" id="check_confirm_transit_cancel0" value=1 checked>
+                            <label class="form-check-label" for="check_confirm_transit_cancel0">주문취소제외</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col flex-fill my-1 d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-secondary me-1" disabled>상태</button>
+                    <div class="form-check form-check-inline me-2">
+                        <input class="form-check-input check_confirm_cancel" type="checkbox" name="check_confirm_cancel0" id="check_confirm_cancel0" value=1>
+                        <label class="form-check-label" for="check_confirm_cancel0">취소건</label>
+                    </div>
+                    <div class="form-check form-check-inline me-2">
+                        <input class="form-check-input check_confirm_watch" type="checkbox" name="check_confirm_watch0" id="check_confirm_watch0" value=1>
+                        <label class="form-check-label" for="check_confirm_watch0">유의건</label>
+                    </div>
+                    <div class="form-check form-check-inline me-2">
+                        <input class="form-check-input check_blacklist" type="checkbox" name="check_blacklist0" id="check_blacklist0" value=1>
+                        <label class="form-check-label" for="check_blacklist0">Blacklist</label>
+                    </div>
+                </div>
+                <div class="col flex-fill btn-toolbar justify-content-end my-1">
+                    <div class="btn-group m-1" role="group">
+                        <button class="btn btn-danger" type="button" id="btn_search">찾기</button>
+                        <button class="btn btn-outline-danger" type="button" id="btn_reset"><a href={% url 'ordermanager:order_index' %}>초기화</a></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<!-- 페이지 버튼 -->
+{% include "ordermanager/ordernav.html" %}
+
+    <div class="row justify-content-between">
+        <div class="col col-auto">
+            {% if customer_name or customer_phone or product_nickname_kr or order_receptionist or order_actor or Qstart or Qend or pkstart or pkend or check_confirm_transit or check_confirm_transit_cancel or check_confirm_cancel or check_confirm_watch or check_blacklist %}
+                <span id="searched">다음에 대한 검색결과:</span>
+            {% endif %}
+            {% if customer_name %}
+                <div class="badge bg-secondary mx-1">주문자 이름: {{ customer_name }} </div>
+            {% endif %}
+            {% if customer_phone %}
+                <div class="badge bg-secondary mx-1">주문자 전화: {{ customer_phone }} </div>
+            {% endif %}
+            {% if product_nickname_kr %}
+                <div class="badge bg-secondary mx-1">제품명: {{ product_nickname_kr }} </div>
+            {% endif %}
+            {% if order_receptionist %}
+                <div class="badge bg-secondary mx-1">접수자: {{ order_receptionist }} </div>
+            {% endif %}
+            {% if order_actor %}
+                <div class="badge bg-secondary mx-1">대행자: {{ order_actor }} </div>
+            {% endif %}
+            {% if Qstart %}
+                <div class="badge bg-secondary mx-1">{{ Qstart }}부터 </div>
+            {% endif %}
+            {% if Qend %}
+                <div class="badge bg-secondary mx-1">{{ Qend }}까지 </div>
+            {% endif %}
+            {% if pkstart %}
+                <div class="badge bg-secondary mx-1">{{ pkstart }}번부터 </div>
+            {% endif %}
+            {% if pkend %}
+                <div class="badge bg-secondary mx-1">{{ pkend }}번까지 </div>
+            {% endif %}
+            {% if check_confirm_transit == '2' %}
+                <div class="badge bg-secondary mx-1">입금항목 전부 </div>
+            {% elif check_confirm_transit == '1' %}
+                <div class="badge bg-secondary mx-1">입금완료 항목 </div>
+            {% elif check_confirm_transit == '0' %}
+                <div class="badge bg-secondary mx-1">미입금 항목 </div>
+            {% endif %}
+            {% if check_confirm_transit_cancel %}
+                <div class="badge bg-secondary mx-1">주문 취소건 제외하고 리스트 </div>
+            {% endif %}
+            {% if check_confirm_cancel %}
+                <div class="badge bg-secondary mx-1">주문 취소건 </div>
+            {% endif %}
+            {% if check_confirm_watch %}
+                <div class="badge bg-secondary mx-1">유의항목 </div>
+            {% endif %}
+            {% if check_blacklist %}
+                <div class="badge bg-secondary mx-1">블랙리스트 </div>
+            {% endif %}
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 my-1">
+            {% if user.is_authenticated %}
+                <form action="{% url 'ordermanager:opp' current_user %}" method="post">
+                {% csrf_token %}
+                    {% if oppsetting %}
+                    <div class="input-group input-group-sm">
+                        <select class="form-select form-select-sm" name="order_per_page" id="order_per_page">
+                            <option selected value="{{ oppsetting }}">현재: {{ oppsetting }}주문 / 페이지</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary" id="btn_orderperpage">저장</button>
+                    </div>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+
+    </div>
+
+<form action="{% url 'ordermanager:order_list_bulkedit' %}" method="post">
+{% csrf_token %}
+    <div class="row">
+        <div class="col btn-toolbar d-flex justify-content-between">
+            <div class="m-1">
+                <a href="{% url 'ordermanager:order_create' %}" class="btn btn-sm btn-success" type="button" id="new_order_btn"><i class="las la-plus-square" style="font-size: 1em"></i>새 주문</a>
+            </div>
+            <div>
+                <div class="btn-group btn-group-sm m-1" role="group">
+                    <button class="btn btn-outline-success" type="submit" name="do_transit">입금<i class="las la-check"></i></button>
+                    <button class="btn btn-outline-danger" type="submit" name="do_untransit">입금<i class="las la-times"></i></button>
+                </div>
+                <div class="btn-group btn-group-sm  m-1" role="group">
+                    <button class="btn btn-outline-success" type="submit" name="do_watch">유의<i class="las la-check"></i></button>
+                    <button class="btn btn-outline-danger" type="submit" name="do_unwatch">유의<i class="las la-times"></i></button>
+                </div>
+                <div class="btn-group btn-group-sm  m-1" role="group">
+                    <button class="btn btn-outline-success" type="submit" name="do_cancel">취소<i class="las la-check"></i></button>
+                    <button class="btn btn-outline-danger" type="submit" name="do_uncancel">취소<i class="las la-times"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+<table class="table table-striped table-hover table-sm align-middle con_txt1">
+<thead>
+    <tr style="text-align: center" class="table-dark">
+        <th scope="col" onclick="order_list_check_all()"><i class="las la-list" style="font-size: 1.6em"></i></th>
+        <th scope="col"><i class="las la-box" style="font-size: 1.6em"></i></th>
+        <th scope="col"><i class="las la-wrench" style="font-size: 1.6em"></i></th>
+    </tr>
+</thead>
+<tbody>
+    {% if order_list %}
+        {% for order in order_list %}
+        <tr class="align-middle {% if order.confirm_watch %}table-danger{% elif not order.customer.name or not order.customer.phone %}table-warning{% endif %}" style="text-align: center;">
+            <!-- 체크박스 -->
+            <td>
+                <input class="form-check-input order_list_check" type="checkbox" name="order_list_check" id="order_list_check_{{ order.id }}" value="{{ order.id }}">
+                <p style="font-size: 0.6em" class="m-0">{{ order.id }}</p>
+            </td>
+
+            <!-- 주문정보 -->
+
+            <td style="text-align: left">
+            <a href="{% url 'ordermanager:order_detail' order.id %}">
+            <div class="m-0">
+                <div class="m-0" style="font-size: 0.8em;">
+                    <p class="m-0">
+                        {% if order.customer.phone %}
+                            {{ order.customer.phone }}
+                        {% else %}
+                            전화 <i class="las la-times"></i>
+                        {% endif %} /
+                        {% if order.customer.name %}
+                        {{ order.customer.name }}
+                        {% else %}
+                            이름 <i class="las la-times"></i>
+                        {% endif %} /
+                        접수: {{ order.receptionist }}
+                    </p>
+                </div>
+                <!--<span class="con_txt2">&emsp;</span><br> -->
+                <span class="con_txt2">{{ order.product.name_kr }} - </span>
+                <span><strong>{{ order.product.nickname_kr }}: {{ order.quantity }}개{% if order.size %}/{{ order.size }}{% endif %}</strong></span>
+                <!-- {% if order.receptionist_memo %}<span class="con_txt2"> ({{ order.receptionist_memo }})</span>{% endif %} -->
+                {% if order.confirm_cancel %}
+                    <!-- <span class="badge rounded-pill bg-danger"><i class="las la-ban" style="font-size: 1.6em"></i></span> -->
+                    <i class="las la-ban text-danger" style="font-size: 1.2em"></i>
+                {% endif %}
+                {% if order.confirm_transit %}
+                    <!-- <span class="badge rounded-pill bg-success"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> -->
+                    <i class="las la-piggy-bank text-success" style="font-size: 1.2em"></i>
+                {% endif %}
+                {% if order.actor_set.count > 0 %}
+                    <span class="badge rounded-pill bg-secondary">{{ order.actor_set.count }}</span>
+                {% endif %}
+                {% if order.buying_price > 0 or order.selling_price > 0  %}
+                    <span class="badge rounded-pill bg-secondary">
+                        {{ order.buying_actor }}:
+                        {% if order.buying_price > 0 %}{{ order.buying_price }}{% else %}<i class="las la-check"></i>{% endif %} /
+                        {% if order.selling_price > 0 %}{{ order.selling_price }}{% else %}<i class="las la-check"></i>{% endif %}
+                    </span>
+                {% endif %}
+            </div>
+            </a>
+            </td>
+            <!-- 주문일자/연락처/주문수정 -->
+            <td>
+                <span style="color: gray; font-size: 0.8em">{{ order.order_date | date:'m/d H:i'}}</span><span class="con_txt2">&emsp;</span><br>
+                <!--
+                {% if order.customer.phone %}
+                    <a href="tel:{{ order.customer.phone }}"><i class="las la-phone-square" style="font-size: 1.6em"></i></a>
+                {% endif %}
+                {% if order.customer.facebook_url %}
+                    <a href="{{ order.customer.facebook_url }}" target="_blank"><i class="lab la-facebook-square" style="font-size: 1.6em"></i></a>
+                {% endif %}
+                -->
+                <a href="{% url 'ordermanager:order_modify' order.id %}"><i class="las la-edit" style="font-size: 1.6em"></i></a>
+            </td>
+        </tr>
+        {% endfor %}
+
+    {% else %}
+        <tr>
+            <td colspan="4">주문이 없습니다.</td>
+        </tr>
+    {% endif %}
+</tbody>
+</table>
+</form>
+
+<!-- 페이지 버튼 -->
+{% include "ordermanager/ordernav.html" %}
+
+<!-- 검색과 페이징 -->
+<form id="searchForm" method="get" action="{% url 'index' %}">
+    <input type="hidden" id="customer_phone" name="customer_phone" value="{{ customer_phone|default_if_none:'' }}">
+    <input type="hidden" id="customer_name" name="customer_name" value="{{ customer_name|default_if_none:'' }}">
+    <input type="hidden" id="product_nickname_kr" name="product_nickname_kr" value="{{ product_nickname_kr|default_if_none:'' }}">
+    <input type="hidden" id="order_receptionist" name="order_receptionist" value="{{ order_receptionist|default_if_none:'' }}">
+    <input type="hidden" id="order_actor" name="order_actor" value="{{ order_actor|default_if_none:'' }}">
+    <input type="hidden" id="Qstart" name="Qstart" value="{{ Qstart|default_if_none:'' }}">
+    <input type="hidden" id="Qend" name="Qend" value="{{ Qend|default_if_none:'' }}">
+    <input type="hidden" id="pkstart" name="pkstart" value="{{ pkstart|default_if_none:'' }}">
+    <input type="hidden" id="pkend" name="pkend" value="{{ pkend|default_if_none:'' }}">
+    <input type="hidden" id="check_confirm_transit" name="check_confirm_transit" value="{{ check_confirm_transit }}">
+    <input type="hidden" id="check_confirm_transit_cancel" name="check_confirm_transit_cancel" value="{{ check_confirm_transit_cancel }}">
+    <input type="hidden" id="check_confirm_cancel" name="check_confirm_cancel" value="{{ check_confirm_cancel }}">
+    <input type="hidden" id="check_confirm_watch" name="check_confirm_watch" value="{{ check_confirm_watch }}">
+    <input type="hidden" id="check_blacklist" name="check_blacklist" value="{{ check_blacklist }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+</form>
+
+<div class="visually-hidden">
+{% if order_list.has_previous %}
+    {% if order_list.number|add:-1 > 0 %}
+        <a class="page-link btn" id="hidden_prev" data-page="{{ order_list.number|add:-1 }}" href="#">prev</a>
+    {% endif %}
+{% endif %}
+{% if order_list.has_next %}
+    {% if order_list.number|add:1 <= order_list.paginator.num_pages %}
+        <a class="page-link btn" id="hidden_next" data-page="{{ order_list.number|add:1 }}" href="#">next</a>
+    {% endif %}
+{% endif %}
+</div>
+
+<script>
+$(document).ready(function(){
+    var $chkboxes = $('.order_list_check');
+    var lastChecked;
+    $chkboxes.click(function(e) {
+        if (!lastChecked) {
+            lastChecked = this;
+            return;
+        }
+        if (e.shiftKey) {
+            var start = $chkboxes.index(this);
+            var end = $chkboxes.index(lastChecked);
+            $chkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).prop('checked', this.checked);
+        }
+        lastChecked = this;
+    });
+});
+
+var chkboxedall = false;
+var $chkboxes = $('.order_list_check');
+function order_list_check_all() {
+    if (!chkboxedall) {
+        $chkboxes.prop('checked', true);
+        chkboxedall = true;
+    } else {
+        $chkboxes.prop('checked', false);
+        chkboxedall = false;
+    }
+}
+</script>
+{% endblock %}

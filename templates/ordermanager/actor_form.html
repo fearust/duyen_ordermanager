@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-3">
+    <form method="POST">
+        {% csrf_token %}
+        {% include 'form_errors.html' %}
+        <div class="mb-2">
+            <label for="actor_memo" class="form-label mb-0">의견</label>
+            <textarea class="form-control" name="actor_memo" id="actor_memo" rows="3">{{ form.actor_memo.value|default_if_none:'' }}</textarea>
+        </div>
+        <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-secondary">저장하기</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

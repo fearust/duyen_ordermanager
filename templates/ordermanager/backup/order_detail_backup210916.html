@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% load imagekit %}
+{% load templatetags %}
+
+{% block title %}
+    주문 상세
+{% endblock %}
+{% block content %}
+
+    <div class="row mt-5">
+
+        <!-- 주문관련 이미지 파트 -->
+        <div class="col-lg-4 mb-3 d-flex">
+            {% if order.orderimage_set.count > 0 %}
+                <div class="accordion flex-fill" id="accordionExample">
+                    {% for image in order.orderimage_set.all  %}
+                        <div class="accordion-item">
+                            <div class="accordion-header" id="heading{{ forloop.counter }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                                    <i class="las la-image" style="font-size: 32px"></i><br>
+                                    <b>&emsp;이미지 #{{ forloop.counter }}</b>
+                                </button>
+                            </div>
+                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <a href="{{ image.image.url }}" target="_blank"><img src="{{ image.image.url }}" width="100%"></a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="align-self-stretch flex-fill border rounded d-flex align-items-center justify-content-center" style="padding: 10px;">
+                <div style="color: gray">이미지 없음</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 기본 주문정보 파트 -->
+        <div class="col-lg-8">
+            <!-- 주문 수정, 삭제 / 전화, 페이스북 링크 -->
+            <div class="gap-2 d-flex justify-content-between">
+                <div class="gap-2">
+                        {% if request.user == order.receptionist or request.user|has_group:"managers" %}
+                            <a href="{% url 'ordermanager:order_modify' order.id %}" class="btn btn-dark mt-1"><i class="las la-edit" style="font-size: 32px"></i><br>주문 수정</a>
+                            <a href="#" class="delete btn btn-dark mt-1" data-uri="{% url 'ordermanager:order_delete' order.id %}"><i class="las la-trash-alt" style="font-size: 32px"></i><br>주문 삭제</a>
+                        {% endif %}
+                </div>
+                <div class="gap-2">
+                    {% if order.customer.phone %}
+                        <a class="btn btn-success mt-1" href="tel:{{ order.customer.phone }}" role="button">
+                            <i class="las la-phone-square" style="font-size: 32px"></i><br>
+                            전화통화
+                        </a>
+                    {% endif %}
+                    {% if order.customer.facebook_url %}
+                        <a class="btn btn-primary mt-1" href="{{ order.customer.facebook_url }}" target="_blank" role="button">
+                            <i class="lab la-facebook-square" style="font-size: 32px"></i><br>
+                            페이스북
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d-flex flex-wrap mt-2">
+                <div class="btn-group btn-group-sm me-2" role="group">
+                    <form>
+                        <button class="btn btn-outline-success" type="submit" name="do_transit">입금확인</button>
+                        <button class="btn btn-outline-danger" type="submit" name="do_untransit">유의사항</button>
+                        <button class="btn btn-outline-danger" type="submit" name="do_untransit">주문취소</button>
+                    </form>
+                </div>
+                {% if order.confirm_transit and order.confirm_watch and order.confirm_cancel %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: linear-gradient(to right, #198754, #dc3545, #d63384);">
+                        <div class="mx-2" ="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인 됨</div>
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항 건</div>
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소 됨</div>
+                    </div>
+                {% elif order.confirm_transit and order.confirm_cancel %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: linear-gradient(to right, #198754, #d63384);">
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인 됨</div>
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소 됨</div>
+                    </div>
+                {% elif order.confirm_transit and order.confirm_watch %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: linear-gradient(to right, #198754, #dc3545);">
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인 됨</div>
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항 건</div>
+                    </div>
+                {% elif order.confirm_watch and order.confirm_cancel %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: linear-gradient(to right, #dc3545, #d63384);">
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항 건</div>
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소 됨</div>
+                    </div>
+                {% elif order.confirm_transit %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: #198754;">
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인 됨</div>
+                    </div>
+                {% elif order.confirm_watch %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: #dc3545;">
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항 건</div>
+                    </div>
+                {% elif order.confirm_cancel %}
+                    <div class="flex-fill d-flex justify-content-center align-items-center rounded"
+                         style="background: #d63384;">
+                        <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소 됨</div>
+                    </div>
+                {% endif %}
+                {% if order.customer.phone %}
+            </div>
+
+
+            <!-- 주문정보 -->
+            <table class="table table-sm mt-3">
+                <thead>
+                <tr class="table-dark">
+                    <th scope="col">항목</th>
+                    <th scope="col">내용</th>
+                </tr>
+                </thead>
+                <tbody class="bg-light">
+                {% if order.customer.name %}
+                    <tr><th scope="row">고객이름</th><td>{{ order.customer.name }} ({{ order.customer.phone }})</td></tr>
+                {% endif %}
+                {% if order.order_addr %}
+                    <tr><th scope="row">주소</th><td>{{ order.order_addr }}</td></tr>
+                {% endif %}
+                {% if order.customer.bank_depositor %}
+                    <tr class="table-secondary"><th scope="row">별도입금자명</th><td>{{ order.customer.bank_depositor }}</td></tr>
+                {% endif %}
+                {% if order.customer.bank_refund %}
+                    <tr class="table-secondary"><th scope="row">환불계좌</th><td>{{ order.customer.bank_refund }}</td></tr>
+                {% endif %}
+                {% if order.product %}
+                    <tr class="sw-tableborder">
+                        <th scope="row">주문항목</th>
+                        <td>
+                            {% if order.product.productimage_set.first %}
+                                <img class="rounded" src="{{ order.product.productimage_set.first.image_thumbnail_fit.url }}" width="100px"><br>
+                            {% endif %}
+                            <strong>{{ order.product.nickname_kr }} ({{ order.product.name_kr }})</strong>
+                            {% if order.quantity %} {{ order.quantity }}개 {% endif %}
+                            {% if order.size %}/ {{ order.size }}{% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if order.receptionist_memo %}
+                    <tr class="table-secondary"><th scope="row">주문메모</th><td>{{ order.receptionist_memo|mark }}</td></tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 댓글 -->
+        <div class="col-12">
+            <h5 class="border-bottom mt-5 mb-1 py-2 ex-bold">| {{ order.actor_set.count }}개의 의견이 있습니다.</h5>
+            <div class="row mb-5">
+
+                <!-- 댓글등록 -->
+                <div class="col-lg-4">
+                    <form action="{% url 'ordermanager:actor_create' order.id %}" method="post" class="my-2">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        <strong>{{ field.label }}</strong>
+                                        {{ field.errors }}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="mb-2">
+                            <label for="actor_supply_url" class="form-label mb-0">구입처</label>
+                            <input type="text" class="form-control" name="actor_supply_url" id="actor_supply_url" aria-describedby="actor_supply_url">
+                            <div id="supplyHelpBlock" class="form-text">
+                                실제 주문한 경우에만 구입처, 구입가, 판매가를 입력하시면 됩니다.
+                            </div>
+                        </div>
+                        <div class="mb-2 row">
+                            <div class="col">
+                                <label for="actor_price" class="form-label mb-0">구입가</label>
+                                <input type="text" class="form-control" name="actor_price" id="actor_price" value=0 aria-describedby="actor_price">
+                            </div>
+                            <div class="col">
+                                <label for="selling_price" class="form-label mb-0">판매가</label>
+                                <input type="text" class="form-control" name="selling_price" id="selling_price" value=0 aria-describedby="selling_price">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label for="actor_memo" class="form-label mb-0">의견</label>
+                            <textarea class="form-control" name="actor_memo" id="actor_memo" rows="3"></textarea>
+                        </div>
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-secondary" value="제출">제출</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 댓글 목록 -->
+                <div class="col-lg-8 mb-3">
+                {% if order.actor_set %}
+                    <table class="table table-sm mt-3">
+                        <thead>
+                        <tr class="table-dark">
+                            <th scope="col">작성자</th>
+                            <th scope="col">내용</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for actor in order.actor_set.all %}
+                            <tr class="bg-light">
+                                <th scope="row">
+                                    {{ actor.actor }}<br>
+                                    {% if request.user == actor.actor or request.user.is_staff %}
+                                        <a href="{% url 'ordermanager:actor_modify' actor.id %}" class="btn btn-sm btn-outline-secondary">수정</a>
+                                        <a href="#" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'ordermanager:actor_delete' actor.id %}">삭제</a>
+                                    {% endif %}
+                                </th>
+                                <td>
+                                    <div class="border-bottom border-1 pb-2 mb-2">
+                                        <p class="m-0 p-0" style="font-size: 0.8em;">작성: {{ actor.actor_date }}</p>
+                                        {% if actor.modify_date %}
+                                            <p class="m-0 p-0" style="font-size: 0.8em;">수정: {{ actor.modify_date }}</p>
+                                        {% endif %}
+                                        {% if actor.actor_price or actor.selling_price %}
+                                            </div>
+                                            <strong>
+                                                {% if actor.actor_supply_url %}
+                                                    구입처: <a href="{{ actor.actor_supply_url }}" target="_blank"><i class="las la-store-alt" style="font-size: 1.6em"></i></a><br>
+                                                {% endif %}
+                                                구입가: {{ actor.actor_price }}원 <br>
+                                                판매가: {{ actor.selling_price }}원 <br>
+                                            </strong>
+                                        {% endif %}
+                                    <p class="mt-3">{{ actor.actor_memo|mark }}</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".delete").on('click', function (){
+                if(confirm("정말로 삭제하시겠습니까?")) {
+                    location.href = $(this).data('uri');
+                }
+            });
+        });
+    </script>
+{% endblock %}
