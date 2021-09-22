@@ -29,7 +29,7 @@ SECRET_KEY = get_secret("SECRET_KEY")
 
 # [디버그 옵션: 배포시에는 수정할 것]
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['3.37.207.165']
 
 
 # Application definition
