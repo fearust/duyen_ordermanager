@@ -1,5 +1,7 @@
 from .base import *
 
+# home/ubuntu/duyen/venv/venv.env 에서 설정됨
+
 DEBUG = False
 ALLOWED_HOSTS = ['3.37.207.165']
 
