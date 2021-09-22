@@ -126,8 +126,8 @@ SIMPLEMDE_OPTIONS = {
     'spellChecker': False,
 }
 
-DEBUG = True
-ALLOWED_HOSTS = ['3.37.207.165']
+DEBUG = False
+ALLOWED_HOSTS = ['3.37.207.165', 'duyen.shopping']
 
 DATABASES = {
     'default': {
