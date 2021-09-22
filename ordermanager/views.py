@@ -158,7 +158,8 @@ def order_create(request):
     else:
         customerform = CustomerForm()
         orderform = OrderForm()
-    context = {'customerform': customerform, 'orderform': orderform, 'productdb': productdb}  # 'customerdb': customerdb, 제외
+        product_name = ''
+    context = {'customerform': customerform, 'orderform': orderform, 'productdb': productdb, 'product_name': product_name}  # 'customerdb': customerdb, 제외
     return render(request, 'ordermanager/order_form.html', context)
 
 
@@ -173,10 +174,13 @@ def order_modify(request, order_id):
     if request.method == 'POST':
         customerform = CustomerForm(request.POST, instance=order.customer)
         orderform = OrderForm(request.POST, instance=order)
+        product_name = request.POST.get('product', '')
+        product_id = Product.objects.get(name_kr=product_name)
         if customerform.is_valid() and orderform.is_valid():
             customerquestion = customerform.save(commit=False)
             customerquestion.save()
             orderquestion = orderform.save(commit=False)
+            orderquestion.product = product_id
             orderquestion.customer = customerquestion
             orderquestion.modify_date = timezone.now()
             orderquestion.receptionist = request.user
@@ -190,7 +194,8 @@ def order_modify(request, order_id):
     else:
         customerform = CustomerForm(instance=order.customer)
         orderform = OrderForm(instance=order)
-    context = {'order': order, 'customerform': customerform, 'orderform': orderform, 'productdb': productdb}  # 'customerdb': customerdb, 제외
+        product_name = Product.objects.get(pk=order_id).name_kr
+    context = {'order': order, 'customerform': customerform, 'orderform': orderform, 'productdb': productdb, 'product_name': product_name}  # 'customerdb': customerdb, 제외
     return render(request, 'ordermanager/order_form.html', context)
 
 
