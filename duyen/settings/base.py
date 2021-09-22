@@ -9,7 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 # [베이스 디렉토리세팅]
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # [secret value 분리 및 제어]
 with open(BASE_DIR / "secret.json") as f:
@@ -25,11 +25,6 @@ def get_secret(setting, secrets=secrets):
 
 
 SECRET_KEY = get_secret("SECRET_KEY")
-
-
-# [디버그 옵션: 배포시에는 수정할 것]
-DEBUG = True
-ALLOWED_HOSTS = ['3.37.207.165']
 
 
 # Application definition

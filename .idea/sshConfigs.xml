@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="3.37.207.165" id="84202349-a68d-4524-9ff4-d10728a144c2" keyPath="C:\python_project\LightsailDefaultKey-ap-northeast-2.pem" port="22" nameFormat="DESCRIPTIVE" username="ubuntu" />
+    </configs>
+  </component>
+</project>
