@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'ordermanager.apps.ManageConfig',
+    'ordermanager.apps.OrdermanagerConfig',
     'common.apps.CommonConfig',
     'imagekit',
     'simplemde',
