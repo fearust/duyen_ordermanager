@@ -1,17 +1,13 @@
-"""
-기본세팅 파일
-"""
-
 from pathlib import Path
 import os
 import json
 from django.core.exceptions import ImproperlyConfigured
 
 
-# [베이스 디렉토리세팅]
+# base dir
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# [secret value 분리 및 제어]
+# secret value
 with open(BASE_DIR / "secret.json") as f:
     secrets = json.loads(f.read())
 
@@ -93,14 +89,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# [국가 설정]
+# language
 LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 
-# 스태틱, 미디어 경로는 잘못 수정하면 이상 작동하기 때문에 조심할 것
+# static, media
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

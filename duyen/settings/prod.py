@@ -3,9 +3,6 @@ from .base import *
 DEBUG = False
 ALLOWED_HOSTS = ['3.37.207.165']
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
