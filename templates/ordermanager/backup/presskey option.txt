@@ -107,3 +107,29 @@ inputMultipleImage.addEventListener("change", e => {
     readMultipleImage(e.target)
 })
 </script>
+
+<script>
+const productSearch = document.getElementById('product')
+productSearch.addEventListener('input', updateProduct);
+$(document).ready(function(){updateProduct()});
+
+function updateProduct(e) {
+    const product_value = document.getElementById('product').value;
+    document.getElementById('productid').value = '';
+
+    if(product_value) {
+        $.get('/manage/productfind/', {product: product_value}, function(data) {
+            const product_getdata = JSON.parse(data);
+            if (product_getdata[0]) {
+                const productidnum = product_getdata[0].id;
+                const namekr = product_getdata[0].name_kr;
+                const nicknamekr = product_getdata[0].nickname_kr;
+                document.getElementById('productid').value = ''.concat(productidnum, "번 상품: ", nicknamekr, " (", namekr, ")");
+                console.log(product_getdata[0])
+            } else {
+                document.getElementById('productid').value = '';
+            }
+        });
+    }
+}
+</script>
