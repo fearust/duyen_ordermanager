@@ -108,7 +108,8 @@ USE_TZ = False
 # static, media
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 STATIC_URL = '/static_root/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/home/ubuntu/duyen/media'
 MEDIA_URL = '/media/'
 STATIC_ROOT = '/home/ubuntu/duyen/static_root'
 
