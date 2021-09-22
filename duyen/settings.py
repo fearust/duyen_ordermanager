@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 # base dir
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # secret value
 with open(BASE_DIR / "secret.json") as f:
