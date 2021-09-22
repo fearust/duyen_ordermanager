@@ -144,7 +144,7 @@
             </div>
             <div class="col-md-6">
                 <div class="form-floating">
-                    <input class="form-control" list="productOptions" name="product" id="product" placeholder="제품명" value="{{ orderform.product.value|default_if_none:'' }}" required >
+                    <input class="form-control" list="productOptions" name="product" id="product" placeholder="제품명" value="{{ product_name.value|default_if_none:'' }}" required >
                     <label for="product">제품명</label>
                     <datalist id="productOptions">
                         {% for choice in productdb %}
