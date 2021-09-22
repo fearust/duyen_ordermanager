@@ -436,9 +436,11 @@ def bill_detail(request):
             order_list_lastday = order_list.first().order_date
             order_list_diffday = order_list_lastday - order_list_firstday
             if order_list_diffday.days < 1:
-                order_list_diffday = 1
+                order_list_range = 1
+            else:
+                order_list_range = order_list_diffday.days
             start_day = order_list_firstday.date()
-            for i in range(order_list_diffday.days):
+            for i in range(order_list_range):
                 end_day = start_day + timedelta(days=1)
                 bydays = order_list.filter(Q(order_date__gte=start_day) & Q(order_date__lte=end_day))
                 try:
