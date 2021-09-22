@@ -111,7 +111,7 @@ STATIC_URL = '/static_root/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 STATIC_ROOT = '/home/ubuntu/duyen/static_root'
-MEDIA_ROOT = '/home/ubuntu/duyen/media'
+MEDIA_ROOT = '/home/ubuntu/duyen/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
