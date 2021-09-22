@@ -126,7 +126,7 @@ SIMPLEMDE_OPTIONS = {
     'spellChecker': False,
 }
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['3.37.207.165']
 
 DATABASES = {
