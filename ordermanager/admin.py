@@ -30,7 +30,6 @@ class OrderAdmin(admin.ModelAdmin):
     actions = ['make_transit', 'make_untransit', 'make_watch', 'make_unwatch', 'make_cancel', 'make_uncancel']
     inlines = [OrderImageInline, ActorInline]
     list_per_page = 100
-    search_fields = ['product']
 
     def customer_info(self, post):
         if post.customer.name:
@@ -110,7 +109,6 @@ class ProductAdmin(admin.ModelAdmin):
     actions = ['make_selling', 'make_unselling', 'make_hide', 'make_unhide']
     inlines = [ProductImageInline,]
     list_per_page = 100
-    search_fields = ['name_kr', 'nickname_kr']
 
     def make_selling(self, request, queryset):
         updated_count = queryset.update(selling=True)  # queryset.update
