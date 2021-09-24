@@ -16,7 +16,7 @@ class ProductImageInline(admin.StackedInline):
 
 
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'phone', 'blacklist']
+    list_display = ['name', 'phone', 'description', 'blacklist']
     list_display_links = ['name', 'phone']
     search_fields = ['phone']
 
