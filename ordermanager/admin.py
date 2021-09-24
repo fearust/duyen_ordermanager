@@ -20,6 +20,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 
 class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name_kr', 'nickname_kr', 'selling', 'hide_product', 'add_date']
     inlines = [ProductImageInline,]
 
 
