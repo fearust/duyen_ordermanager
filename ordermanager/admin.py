@@ -18,6 +18,7 @@ class ProductImageInline(admin.StackedInline):
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['name', 'phone', 'blacklist']
     list_display_links = ['name', 'phone']
+    search_fields = ['phone']
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -28,6 +29,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = [('order_date', DateRangeFilter), 'confirm_transit', 'confirm_watch', 'confirm_cancel']
     actions = ['make_transit', 'make_untransit', 'make_watch', 'make_unwatch', 'make_cancel', 'make_uncancel']
     inlines = [OrderImageInline, ActorInline]
+    list_per_page = 100
+    search_fields = ['product']
 
     def customer_info(self, post):
         if post.customer.name:
@@ -106,6 +109,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ['selling', 'hide_product']
     actions = ['make_selling', 'make_unselling', 'make_hide', 'make_unhide']
     inlines = [ProductImageInline,]
+    list_per_page = 100
+    search_fields = ['name_kr', 'nickname_kr']
 
     def make_selling(self, request, queryset):
         updated_count = queryset.update(selling=True)  # queryset.update
@@ -130,6 +135,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 class AccountSettingAdmin(admin.ModelAdmin):
     list_display = ['user', 'order_per_page']
+    list_per_page = 100
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Customer, CustomerAdmin)
