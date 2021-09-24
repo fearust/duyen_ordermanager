@@ -19,7 +19,7 @@ class OrderAdmin(admin.ModelAdmin):
                     'confirm_transit', 'confirm_watch', 'confirm_cancel',
                     'order_date']
     list_display_links = ['id', 'customer_info', 'order_info', 'selling_info',]
-    list_filter = ['confirm_transit', 'confirm_watch', 'confirm_cancel']
+    list_filter = ['confirm_transit', 'confirm_watch', 'confirm_cancel', 'order_date']
     inlines = [OrderImageInline, ActorInline]
 
     def customer_info(self, post):
