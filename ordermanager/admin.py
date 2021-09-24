@@ -25,15 +25,15 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ['selling', 'hide_product']
     inlines = [ProductImageInline,]
 
-    def make_published(self, request, queryset):
+    def make_selling(self, request, queryset):
         updated_count = queryset.update(selling=True)  # queryset.update
         self.message_user(request, '{}건의 상품을 판매중 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_published.short_description = '지정 상품을 판매중 상태로 변경'
+    make_selling.short_description = '지정 상품을 판매중 상태로 변경'
 
-    def make_draft(self, request, queryset):
+    def make_unselling(self, request, queryset):
         updated_count = queryset.update(selling=False)  # queryset.update
         self.message_user(request, '{}건의 상품을 판매중단 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_draft.short_description = '지정 상품을 판매중단 상태로 변경'
+    make_unselling.short_description = '지정 상품을 판매중단 상태로 변경'
 
 
 admin.site.register(Product, ProductAdmin)
