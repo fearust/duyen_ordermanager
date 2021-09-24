@@ -15,8 +15,20 @@ class ProductImageInline(admin.StackedInline):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [OrderImageInline,
-               ActorInline]
+    list_display = ['id', 'customer_info']
+    inlines = [OrderImageInline, ActorInline]
+
+    def customer_info(self, post):
+        if post.customer.name:
+            name = post.customer.name
+        else:
+            name = 'none'
+        if post.customer.phone:
+            phone = post.customer.phone
+        else:
+            phone = 'none'
+        return '{} - {}'.format(name, phone)
+    customer_info.short_description = '고객'
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -38,13 +50,13 @@ class ProductAdmin(admin.ModelAdmin):
 
     def make_hide(self, request, queryset):
         updated_count = queryset.update(hide_product=True)  # queryset.update
-        self.message_user(request, '{}건의 상품을 숨김 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_hide.short_description = '지정 상품을 숨김 상태로 변경'
+        self.message_user(request, '{}건의 상품을 시스템에서 숨김 상태로 변경'.format(updated_count))  # django message framework 활용
+    make_hide.short_description = '지정 상품을 시스템에서 숨김 상태로 변경'
 
     def make_unhide(self, request, queryset):
         updated_count = queryset.update(hide_product=False)  # queryset.update
-        self.message_user(request, '{}건의 상품을 숨김해제 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_unhide.short_description = '지정 상품을 숨김해제 상태로 변경'
+        self.message_user(request, '{}건의 상품을 시스템에서 숨김해제 상태로 변경'.format(updated_count))  # django message framework 활용
+    make_unhide.short_description = '지정 상품을 시스템에서 숨김해제 상태로 변경'
 
 
 admin.site.register(Product, ProductAdmin)
