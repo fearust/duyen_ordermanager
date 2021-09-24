@@ -1,5 +1,6 @@
 from django.contrib import admin
 from ordermanager.models import Product, ProductImage, Customer, Order, OrderImage, Actor, AccountSetting
+from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
 
 
 class OrderImageInline(admin.StackedInline):
@@ -19,7 +20,7 @@ class OrderAdmin(admin.ModelAdmin):
                     'confirm_transit', 'confirm_watch', 'confirm_cancel',
                     'order_date']
     list_display_links = ['id', 'customer_info', 'order_info', 'selling_info',]
-    list_filter = ['confirm_transit', 'confirm_watch', 'confirm_cancel', 'order_date']
+    list_filter = [('order_date', DateRangeFilter), 'confirm_transit', 'confirm_watch', 'confirm_cancel']
     inlines = [OrderImageInline, ActorInline]
 
     def customer_info(self, post):
