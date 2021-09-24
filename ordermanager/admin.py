@@ -23,6 +23,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['name_kr', 'nickname_kr', 'selling', 'hide_product', 'add_date']
     list_display_links = ['name_kr', 'nickname_kr']
     list_filter = ['selling', 'hide_product']
+    actions = ['make_selling', 'make_unselling', 'make_hide', 'make_unhide']
     inlines = [ProductImageInline,]
 
     def make_selling(self, request, queryset):
@@ -34,6 +35,16 @@ class ProductAdmin(admin.ModelAdmin):
         updated_count = queryset.update(selling=False)  # queryset.update
         self.message_user(request, '{}건의 상품을 판매중단 상태로 변경'.format(updated_count))  # django message framework 활용
     make_unselling.short_description = '지정 상품을 판매중단 상태로 변경'
+
+    def make_hide(self, request, queryset):
+        updated_count = queryset.update(hide_product=True)  # queryset.update
+        self.message_user(request, '{}건의 상품을 숨김 상태로 변경'.format(updated_count))  # django message framework 활용
+    make_hide.short_description = '지정 상품을 숨김 상태로 변경'
+
+    def make_unhide(self, request, queryset):
+        updated_count = queryset.update(hide_product=False)  # queryset.update
+        self.message_user(request, '{}건의 상품을 숨김해제 상태로 변경'.format(updated_count))  # django message framework 활용
+    make_unhide.short_description = '지정 상품을 숨김해제 상태로 변경'
 
 
 admin.site.register(Product, ProductAdmin)
