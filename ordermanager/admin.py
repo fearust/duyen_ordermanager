@@ -21,6 +21,8 @@ class OrderAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name_kr', 'nickname_kr', 'selling', 'hide_product', 'add_date']
+    list_display_links = ['name_kr', 'nickname_kr']
+    list_filter = ['selling', 'hide_product']
     inlines = [ProductImageInline,]
 
 
