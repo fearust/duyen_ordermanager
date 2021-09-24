@@ -15,7 +15,11 @@ class ProductImageInline(admin.StackedInline):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer_info']
+    list_display = ['id', 'customer_info', 'order_info', 'selling_info',
+                    'confirm_transit', 'confirm_watch', 'confirm_cancel',
+                    'order_date']
+    list_display_links = ['id', 'customer_info', 'order_info', 'selling_info',]
+    list_filter = ['confirm_transit', 'confirm_watch', 'confirm_cancel']
     inlines = [OrderImageInline, ActorInline]
 
     def customer_info(self, post):
@@ -29,6 +33,40 @@ class OrderAdmin(admin.ModelAdmin):
             phone = 'none'
         return '{} - {}'.format(name, phone)
     customer_info.short_description = '고객'
+
+    def order_info(self, post):
+        if post.product.name_kr:
+            name = post.product.name_kr
+        else:
+            name = 'none'
+        if post.product.nickname_kr:
+            nickname = post.product.nickname_kr
+        else:
+            nickname = 'none'
+        if post.quantity:
+            quantity = post.quantity
+        else:
+            quantity = '?'
+        if post.size:
+            size = post.size
+        else:
+            size = '?'
+
+        return '{}({})/개수:{}/사이즈:{}/'.format(name, nickname, quantity, size)
+    order_info.short_description = '주문정보'
+
+    def selling_info(self, post):
+        if post.buying_price:
+            buying_price = post.buying_price
+        else:
+            buying_price = 'X'
+        if post.selling_price:
+            selling_price = post.selling_price
+        else:
+            selling_price = 'X'
+        return '{} / {}'.format(buying_price, selling_price)
+    selling_info.short_description = '구매가,판매가'
+
 
 
 class ProductAdmin(admin.ModelAdmin):
