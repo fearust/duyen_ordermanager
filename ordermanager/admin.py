@@ -15,6 +15,11 @@ class ProductImageInline(admin.StackedInline):
     model = ProductImage
 
 
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ['name', 'phone', 'blacklist']
+    list_display_links = ['name', 'phone']
+
+
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'customer_info', 'order_info', 'selling_info',
                     'confirm_transit', 'confirm_watch', 'confirm_cancel',
@@ -123,7 +128,10 @@ class ProductAdmin(admin.ModelAdmin):
     make_unhide.short_description = '지정 상품을 시스템에서 숨김해제 상태로 변경'
 
 
+class AccountSettingAdmin(admin.ModelAdmin):
+    list_display = ['user', 'order_per_page']
+
 admin.site.register(Product, ProductAdmin)
-admin.site.register(Customer)
+admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Order, OrderAdmin)
-admin.site.register(AccountSetting)
+admin.site.register(AccountSetting, AccountSettingAdmin)
