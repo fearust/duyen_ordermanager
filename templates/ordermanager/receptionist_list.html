@@ -45,13 +45,11 @@
                 </div>
                 <div class="input-group input-group-sm pb-1">
                     <span class="input-group-text" id="addon-wrapping" style="border:solid black; border-width: 2px 0 2px 2px;"><i class="las la-boxes" style="font-size: 1.2em"></i></span>
-                    <input class="form-control" name="product" id="product" list="productOptions" placeholder="제품명" value="{{ orderform.product.value|default_if_none:'' }}" style="border:solid black; border-width: 2px 0 2px 0;" required>
-                    <datalist id="productOptions">
+                    <select class="form-select" name="product" id="product" placeholder="제품명" value="{{ product_name|default_if_none:'' }}" style="border:solid black; border-width: 2px 0 2px 0;" required>
                         {% for choice in productdb %}
-                            <option value="{{ choice.name_kr }}">{{ choice.nickname_kr }}</option>
+                            <option value="{{ choice.name_kr }}">{{ choice.nickname_kr }} ({{ choice.name_kr }})</option>
                         {% endfor %}
-                    </datalist>
-                    <input class="form-control" name="productid" id="productid" value="" style="border:solid black; border-width: 2px 2px 2px 0;" readonly>
+                    </select>
                 </div>
                 <div class="input-group input-group-sm pb-1">
                     <span class="input-group-text" id="addon-wrapping"><i class="las la-dice-five" style="font-size: 1.2em"></i>&nbsp개수</span>
