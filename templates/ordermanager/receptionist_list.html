@@ -45,7 +45,7 @@
                 </div>
                 <div class="input-group input-group-sm pb-1">
                     <span class="input-group-text" id="addon-wrapping" style="border:solid black; border-width: 2px 0 2px 2px;"><i class="las la-boxes" style="font-size: 1.2em"></i></span>
-                    <select class="form-select" name="product" id="product" placeholder="제품명" value="{{ product_name|default_if_none:'' }}" style="border:solid black; border-width: 2px 0 2px 0;" required>
+                    <select class="form-select" name="product" id="product" placeholder="제품명" value="{{ product_name|default_if_none:'' }}" style="border:solid black; border-width: 2px 2px 2px 0;" required>
                         {% for choice in productdb %}
                             <option value="{{ choice.name_kr }}">{{ choice.nickname_kr }} ({{ choice.name_kr }})</option>
                         {% endfor %}
