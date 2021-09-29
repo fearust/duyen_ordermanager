@@ -144,7 +144,8 @@
             </div>
             <div class="col-md-6">
                 <div class="form-floating">
-                    <select class="form-select" name="product" id="product" placeholder="제품명" value="{{ product_name|default_if_none:'' }}" required>
+                    <label for="quantity">상품명</label>
+                    <select class="form-select" name="product" id="product" value="{{ product_name|default_if_none:'' }}" required>
                         <option selected value=""></option>
                         {% for choice in productdb %}
                             <option value="{{ choice.name_kr }}">{{ choice.nickname_kr }} ({{ choice.name_kr }})</option>
