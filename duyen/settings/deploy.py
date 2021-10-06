@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['3.37.207.165', 'duyen.shopping']
 
 # Database
