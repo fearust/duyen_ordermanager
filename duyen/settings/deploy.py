@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = False
-ALLOWED_HOSTS = ['3.36.131.242', 'duyen.shopping']
+ALLOWED_HOSTS = ['3.35.173.174', 'duyen.shopping']
 
 # Database
 DATABASES = {
