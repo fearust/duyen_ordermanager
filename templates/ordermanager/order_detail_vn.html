@@ -3,7 +3,7 @@
 {% load templatetags %}
 
 {% block title %}
-    주문 상세
+    Đặt hàng
 {% endblock %}
 {% block content %}
 
@@ -29,7 +29,7 @@
                             <div class="accordion-header" id="heading{{ forloop.counter }}">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
                                     <i class="las la-image" style="font-size: 32px"></i><br>
-                                    <b>&emsp;이미지 #{{ forloop.counter }}</b>
+                                    <b>&emsp;Ảnh mua hàng #{{ forloop.counter }}</b>
                                 </button>
                             </div>
                             <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionExample">
@@ -42,7 +42,7 @@
                 </div>
             {% else %}
                 <div class="align-self-stretch flex-fill border rounded d-flex align-items-center justify-content-center" style="padding: 10px;">
-                <div style="color: gray">이미지 없음</div>
+                <div style="color: gray">Ảnh mua hàng (none)</div>
                 </div>
             {% endif %}
         </div>
@@ -55,19 +55,19 @@
                     <div class="gap-2">
                         {% if request.user == order.receptionist or request.user.is_staff %}
                             <!-- request.user|has_group:"managers" 그룹설정 -->
-                            <a href="{% url 'ordermanager:order_modify' order.id %}" class="btn btn-secondary" id="order_modify_btn"><i class="las la-edit" style="font-size: 32px"></i><br>수정</a>
-                            <a href="#" class="delete btn btn-secondary" data-uri="{% url 'ordermanager:order_delete' order.id %}" id="order_delete_btn"><i class="las la-trash-alt" style="font-size: 32px"></i><br>삭제</a>
+                            <a href="{% url 'ordermanager:order_modify_vn' order.id %}" class="btn btn-secondary" id="order_modify_btn"><i class="las la-edit" style="font-size: 32px"></i><br>Sửa Đổi</a>
+                            <a href="#" class="delete btn btn-secondary" data-uri="{% url 'ordermanager:order_delete_vn' order.id %}" id="order_delete_btn"><i class="las la-trash-alt" style="font-size: 32px"></i><br>Xóa</a>
                         {% endif %}
                     </div>
                     <div class="gap-2">
                         {% if order.phone %}
                             <a class="btn btn-success" href="tel:{{ order.phone.first }}" role="button" id="phone_btn">
-                                <i class="las la-phone-square" style="font-size: 32px"></i><br>통화
+                                <i class="las la-phone-square" style="font-size: 32px"></i><br>Số điện thoại liên lạc
                             </a>
                         {% endif %}
                         {% if order.facebook_url %}
                             <a class="btn btn-primary" href="{{ order.facebook_url }}" target="_blank" role="button" id="facebook_btn">
-                                <i class="lab la-facebook-square" style="font-size: 32px"></i><br>페북
+                                <i class="lab la-facebook-square" style="font-size: 32px"></i><br>facebook
                             </a>
                         {% endif %}
                     </div>
@@ -77,9 +77,9 @@
                     <div class="btn-group btn-group-sm me-2 py-1" role="group">
                         <form action="{% url 'ordermanager:order_confirm_modify' order.id %}" method="post">
                             {% csrf_token %}
-                            <button class="btn btn-outline-success" type="submit" name="do_transit" id="do_transit">입금확인</button>
-                            <button class="btn btn-outline-danger" type="submit" name="do_watch" id="do_watch">유의사항</button>
-                            <button class="btn btn-outline-danger" type="submit" name="do_cancel" id="do_cancel">주문취소</button>
+                            <button class="btn btn-outline-success" type="submit" name="do_transit" id="do_transit">Xác Nhận Gửi tiền</button>
+                            <button class="btn btn-outline-danger" type="submit" name="do_watch" id="do_watch">Hạng mục lưu ý</button>
+                            <button class="btn btn-outline-danger" type="submit" name="do_cancel" id="do_cancel">Hủy Đơn hàng</button>
                         </form>
                     </div>
                 </div>
@@ -92,64 +92,64 @@
                         {% if order.confirm_transit and order.confirm_watch and order.confirm_cancel %}
                             <div class="mt-1 p-2 d-flex flex-wrap justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #198754, #dc3545, #d63384);">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인</div>
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항</div>
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> Xác Nhận Gửi tiền</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> Hạng mục lưu ý</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> Hủy Đơn hàng</div>
                             </div>
                         {% elif order.confirm_transit and order.confirm_cancel %}
                             <div class="mt-1 p-2 d-flex flex-wrap justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #198754, #d63384);">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인</div>
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> Xác Nhận Gửi tiền</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> Hủy Đơn hàng</div>
                             </div>
                         {% elif order.confirm_transit and order.confirm_watch %}
                             <div class="mt-1 p-2 d-flex flex-wrap justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #198754, #dc3545);">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인</div>
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> Xác Nhận Gửi tiền</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> Hạng mục lưu ý</div>
                             </div>
                         {% elif order.confirm_watch and order.confirm_cancel %}
                             <div class="mt-1 p-2 d-flex flex-wrap justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #dc3545, #d63384);">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항</div>
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> Hạng mục lưu ý</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> Hủy Đơn hàng</div>
                             </div>
                         {% elif order.confirm_transit %}
                             <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                                  style="background: #198754;">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> 입금확인</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> Xác Nhận Gửi tiền</div>
                             </div>
                         {% elif order.confirm_watch %}
                             <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                                  style="background: #dc3545;">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> 유의사항</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-flag" style="font-size: 1.6em"></i></span> Hạng mục lưu ý</div>
                             </div>
                         {% elif order.confirm_cancel %}
                             <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                                  style="background: #d63384;">
-                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> 주문취소</div>
+                                <div class="mx-2" style="color: white; font-weight: bold"><span class="badge rounded-pill bg-light text-dark"><i class="las la-ban" style="font-size: 1.6em"></i></span> Hủy Đơn hàng</div>
                             </div>
                         {% endif %}
                         <!-- 이름과 전화번호 -->
                         {% if not order.customer and not order.phone.all|join:""|length %}
                             <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #fd7e14, #dc3545);">
-                                <div class="mx-2" style="color: white; font-weight: bold">주문자 이름과 전화번호가 없습니다.</div>
+                                <div class="mx-2" style="color: white; font-weight: bold">Số điện thoại, Tên người mua hàng: X</div>
                             </div>
                         {% elif not order.customer %}
                             <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #fd7e1480, #dc354580);">
-                                <div class="mx-2" style="color: black; font-weight: bold">주문자 이름이 없습니다.</div>
+                                <div class="mx-2" style="color: black; font-weight: bold">Tên người mua hàng: X</div>
                             </div>
                         {% elif not order.phone.all|join:""|length %}
                             <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                                  style="background: linear-gradient(to right, #fd7e1480, #dc354580);">
-                                <div class="mx-2" style="color: black; font-weight: bold">주문자 전화번호가 없습니다.</div>
+                                <div class="mx-2" style="color: black; font-weight: bold">Số điện thoại: X</div>
                             </div>
                         {% endif %}
                         <div class="mt-1 p-2 d-flex justify-content-center align-items-center rounded"
                              style="background: linear-gradient(to right, #20c997, #0dcaf0);">
-                            <div class="mx-2" style="color: black; font-weight: bold">{{ order.receptionist }}님이 {{ order.order_date|date:"y/m/n H:i:s" }}에 접수한 항목입니다.</div>
+                            <div class="mx-2" style="color: black; font-weight: bold">Người tiếp nhận mua hàng :{{ order.receptionist }} ({{ order.order_date|date:"y/m/n H:i:s" }})</div>
                         </div>
                     </div>
                 </div>
@@ -158,11 +158,11 @@
                         <form action="{% url 'ordermanager:price_update' order.id %}" method="post">
                             {% csrf_token %}
                             <div class="input-group py-1" style="z-index: 9999;">
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 1em">구입가</span>
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 1em">Mua Hàng</span>
                                 <input class="form-control buying_price" name="buying_price" id="buying_price" value="{{ buying_price|default_if_none:'' }}">
-                                <span class="input-group-text" id="addon-wrapping" style="font-size: 1em">판매가</span>
+                                <span class="input-group-text" id="addon-wrapping" style="font-size: 1em">Bán Hàng</span>
                                 <input class="form-control selling_price" name="selling_price" id="selling_price" value="{{ selling_price|default_if_none:'' }}">
-                                <button class="btn btn-secondary" type="submit" id="price_btn">저장</button>
+                                <button class="btn btn-secondary" type="submit" id="price_btn">Lưu Lại</button>
                             </div>
                         </form>
                     </div>
@@ -170,7 +170,7 @@
                     {% if order.buying_price > 0 or order.selling_price > 0 %}
                         <div class="p-2 pt-4 d-flex flex-wrap justify-content-center align-items-center rounded"
                              style="background: linear-gradient(to right, #0d6efd, #6f42c1); transform: translateY(-20px); z-index: -9999;">
-                            <div class="mx-2" style="color: white; font-weight: bold">{{ buying_actor }}님이 구입가 {{ buying_price }}원, 판매가 {{ selling_price }}원으로 업데이트하였습니다.</div>
+                            <div class="mx-2" style="color: white; font-weight: bold">Người đại diện mua hàng: {{ buying_actor }} / Mua Hàng: {{ buying_price }}won, Bán Hàng: {{ selling_price }}won</div>
                         </div>
                     {% endif %}
                 </div>
@@ -180,14 +180,14 @@
             <table class="table table-sm mt-3">
                 <thead>
                 <tr class="table-dark">
-                    <th scope="col">항목</th>
-                    <th scope="col">내용</th>
+                    <th scope="col">Hạng Mục</th>
+                    <th scope="col">Nội dung</th>
                 </tr>
                 </thead>
                 <tbody class="bg-light">
                 {% if order.customer and order.phone %}
                     <tr>
-                        <th scope="row">고객이름</th>
+                        <th scope="row">Tên người mua hàng</th>
                         <td>
                             {{ order.customer }}
                             ({{ order.phone.all|join:", " }})
@@ -195,41 +195,41 @@
                     </tr>
                 {% elif order.customer %}
                     <tr class="table-warning">
-                        <th scope="row">고객이름</th>
-                        <td>고객이름: {{ order.customer }} / 전화번호 없음</td>
+                        <th scope="row">Tên người mua hàng</th>
+                        <td>Tên người mua hàng: {{ order.customer }} / Số điện thoại: X</td>
                     </tr>
                 {% elif order.phone %}
                     <tr class="table-warning">
-                        <th scope="row">고객이름</th>
-                        <td>전화번호: {{ order.phone.all|join:", " }} / 고객이름 없음</td>
+                        <th scope="row">Tên người mua hàng</th>
+                        <td>Số điện thoại: {{ order.phone.all|join:", " }} / Tên người mua hàng: X</td>
                     </tr>
                 {% else %}
                     <tr class="table-warning">
-                        <th scope="row">고객이름</th>
-                        <td>고객이름과 전화번호가 없습니다. 입력해주세요.</td>
+                        <th scope="row">Tên người mua hàng</th>
+                        <td>Tên người mua hàng, Số điện thoại: X </td>
                     </tr>
                 {% endif %}
                 {% if order.order_addr %}
-                    <tr><th scope="row">주소</th><td>{{ order.order_addr }}</td></tr>
+                    <tr><th scope="row">Địa Chỉ</th><td>{{ order.order_addr }}</td></tr>
                 {% endif %}
                 {% if order.bank_depositor %}
-                    <tr class="table-secondary"><th scope="row">별도입금자명</th><td>{{ order.bank_depositor }}</td></tr>
+                    <tr class="table-secondary"><th scope="row">Tên người chuyển khoản</th><td>{{ order.bank_depositor }}</td></tr>
                 {% endif %}
                 {% if order.bank_refund %}
-                    <tr class="table-secondary"><th scope="row">환불계좌</th><td>{{ order.bank_refund }}</td></tr>
+                    <tr class="table-secondary"><th scope="row">số tài khoản chuyển khoản lại</th><td>{{ order.bank_refund }}</td></tr>
                 {% endif %}
                 {% if order.product %}
                     <tr class="sw-tableborder">
-                        <th scope="row">주문항목</th>
+                        <th scope="row">Hạng Mục</th>
                         <td>
                             <strong>{{ order.product.all|join:", " }}</strong>
-                            {% if order.quantity %} {{ order.quantity }}개 {% endif %}
-                            {% if order.size %}/ {{ order.size }}{% endif %}
+                            {% if order.quantity %}Số Lượng: {{ order.quantity }} {% endif %}
+                            {% if order.size %}/ Size: {{ order.size }}{% endif %}
                         </td>
                     </tr>
                 {% endif %}
                 {% if order.receptionist_memo %}
-                    <tr class="table-secondary"><th scope="row">주문메모</th><td>{{ order.receptionist_memo|mark }}</td></tr>
+                    <tr class="table-secondary"><th scope="row">Memo</th><td>{{ order.receptionist_memo|mark }}</td></tr>
                 {% endif %}
                 </tbody>
             </table>
@@ -237,12 +237,12 @@
 
         <!-- 댓글 -->
         <div class="col-12">
-            <h5 class="border-bottom mt-5 mb-1 py-2 ex-bold">| {{ order.actor_set.count }}개의 의견이 있습니다.</h5>
+            <h5 class="border-bottom mt-5 mb-1 py-2 ex-bold">| Ý Kiến: {{ order.actor_set.count }}</h5>
             <div class="row mb-5">
 
                 <!-- 댓글등록 -->
                 <div class="col-lg-4">
-                    <form action="{% url 'ordermanager:actor_create' order.id %}" method="post" class="my-2">
+                    <form action="{% url 'ordermanager:actor_create_vn' order.id %}" method="post" class="my-2">
                         {% csrf_token %}
                         {% if form.errors %}
                             <div class="alert alert-danger" role="alert">
@@ -255,11 +255,11 @@
                             </div>
                         {% endif %}
                         <div class="mb-2">
-                            <label for="actor_memo" class="form-label mb-0">의견</label>
+                            <label for="actor_memo" class="form-label mb-0">Ý Kiến</label>
                             <textarea class="form-control" name="actor_memo" id="actor_memo" rows="3"></textarea>
                         </div>
                         <div class="d-grid mt-3">
-                            <button type="submit" class="btn btn-secondary" value="제출">제출</button>
+                            <button type="submit" class="btn btn-secondary" value="제출">Lưu Lại</button>
                         </div>
                     </form>
                 </div>
@@ -270,8 +270,8 @@
                     <table class="table table-sm mt-3">
                         <thead>
                         <tr class="table-dark">
-                            <th scope="col">작성자</th>
-                            <th scope="col">내용</th>
+                            <th scope="col">Người viết</th>
+                            <th scope="col">Nội dung</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -280,15 +280,15 @@
                                 <th scope="row">
                                     {{ actor.actor }}<br>
                                     {% if request.user == actor.actor or request.user.is_staff %}
-                                        <a href="{% url 'ordermanager:actor_modify' actor.id %}" class="btn btn-sm btn-outline-secondary">수정</a>
-                                        <a href="#" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'ordermanager:actor_delete' actor.id %}">삭제</a>
+                                        <a href="{% url 'ordermanager:actor_modify_vn' actor.id %}" class="btn btn-sm btn-outline-secondary">Sửa Đổi</a>
+                                        <a href="#" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'ordermanager:actor_delete_vn' actor.id %}">Xóa</a>
                                     {% endif %}
                                 </th>
                                 <td>
                                     <div class="border-bottom border-1 pb-2 mb-2">
-                                        <p class="m-0 p-0" style="font-size: 0.8em;">작성: {{ actor.actor_date }}</p>
+                                        <p class="m-0 p-0" style="font-size: 0.8em;">post date: {{ actor.actor_date }}</p>
                                         {% if actor.modify_date %}
-                                            <p class="m-0 p-0" style="font-size: 0.8em;">수정: {{ actor.modify_date }}</p>
+                                            <p class="m-0 p-0" style="font-size: 0.8em;">modify date: {{ actor.modify_date }}</p>
                                         {% endif %}
                                     <p class="mt-3">{{ actor.actor_memo|mark }}</p>
                                 </td>
@@ -311,7 +311,7 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $(".delete").on('click', function (){
-                if(confirm("정말로 삭제하시겠습니까?")) {
+                if(confirm("Xóa?")) {
                     location.href = $(this).data('uri');
                 }
             });

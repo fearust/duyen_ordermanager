@@ -1,24 +1,16 @@
 from django.contrib import admin
-from ordermanager.models import Product, ProductImage, Customer, Order, OrderImage, Actor, AccountSetting
+from ordermanager.models import Order, OrderImage, Actor, AccountSetting, PhoneTag, ProductTag
 from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
 
 
 class OrderImageInline(admin.StackedInline):
     model = OrderImage
+    extra = 1
 
 
 class ActorInline(admin.StackedInline):
     model = Actor
-
-
-class ProductImageInline(admin.StackedInline):
-    model = ProductImage
-
-
-class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'phone', 'description', 'blacklist']
-    list_display_links = ['name', 'phone']
-    search_fields = ['phone']
+    extra = 1
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -32,26 +24,22 @@ class OrderAdmin(admin.ModelAdmin):
     list_per_page = 100
 
     def customer_info(self, post):
-        if post.customer.name:
-            name = post.customer.name
+        if post.customer:
+            name = post.customer
         else:
-            name = 'none'
-        if post.customer.phone:
-            phone = post.customer.phone
+            name = '없음'
+        if post.phone.all().count() > 0:
+            phone = ', '.join(phone.name for phone in post.phone.all())
         else:
-            phone = 'none'
+            phone = '없음'
         return '{} - {}'.format(name, phone)
     customer_info.short_description = '고객'
 
     def order_info(self, post):
-        if post.product.name_kr:
-            name = post.product.name_kr
+        if post.product.all().count() > 0:
+            name = ', '.join(product.name for product in post.product.all())
         else:
-            name = 'none'
-        if post.product.nickname_kr:
-            nickname = post.product.nickname_kr
-        else:
-            nickname = 'none'
+            name = '없음'
         if post.quantity:
             quantity = post.quantity
         else:
@@ -60,7 +48,7 @@ class OrderAdmin(admin.ModelAdmin):
             size = post.size
         else:
             size = '?'
-        return '{}({})/개수:{}/사이즈:{}'.format(name, nickname, quantity, size)
+        return '{}/개수:{}/사이즈:{}'.format(name, quantity, size)
     order_info.short_description = '주문정보'
 
     def selling_info(self, post):
@@ -79,63 +67,39 @@ class OrderAdmin(admin.ModelAdmin):
         updated_count = queryset.update(confirm_transit=True)  # queryset.update
         self.message_user(request, '{}건의 주문을 입금확인 상태로 변경'.format(updated_count))  # django message framework 활용
     make_transit.short_description = '지정 주문을 입금확인 상태로 변경'
+
     def make_untransit(self, request, queryset):
         updated_count = queryset.update(confirm_transit=False)  # queryset.update
         self.message_user(request, '{}건의 주문을 입금미확인 상태로 변경'.format(updated_count))  # django message framework 활용
     make_untransit.short_description = '지정 주문을 입금미확인 상태로 변경'
+
     def make_watch(self, request, queryset):
         updated_count = queryset.update(confirm_watch=True)  # queryset.update
         self.message_user(request, '{}건의 주문을 유의사항으로 추가'.format(updated_count))  # django message framework 활용
     make_watch.short_description = '지정 주문을 유의사항으로 추가'
+
     def make_unwatch(self, request, queryset):
         updated_count = queryset.update(confirm_watch=False)  # queryset.update
         self.message_user(request, '{}건의 주문을 유의사항에서 제외'.format(updated_count))  # django message framework 활용
     make_unwatch.short_description = '지정 주문을 유의사항에서 제외'
+
     def make_cancel(self, request, queryset):
         updated_count = queryset.update(confirm_cancel=True)  # queryset.update
         self.message_user(request, '{}건의 주문을 주문취소 상태로 변경'.format(updated_count))  # django message framework 활용
     make_cancel.short_description = '지정 주문을 주문취소 상태로 변경'
+
     def make_uncancel(self, request, queryset):
         updated_count = queryset.update(confirm_cancel=False)  # queryset.update
         self.message_user(request, '{}건의 주문을 주문취소 상태 해제'.format(updated_count))  # django message framework 활용
     make_uncancel.short_description = '지정 주문을 주문취소 상태 해제'
 
 
-
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name_kr', 'nickname_kr', 'selling', 'hide_product', 'add_date']
-    list_display_links = ['name_kr', 'nickname_kr']
-    list_filter = ['selling', 'hide_product']
-    actions = ['make_selling', 'make_unselling', 'make_hide', 'make_unhide']
-    inlines = [ProductImageInline,]
-    list_per_page = 100
-
-    def make_selling(self, request, queryset):
-        updated_count = queryset.update(selling=True)  # queryset.update
-        self.message_user(request, '{}건의 상품을 판매중 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_selling.short_description = '지정 상품을 판매중 상태로 변경'
-
-    def make_unselling(self, request, queryset):
-        updated_count = queryset.update(selling=False)  # queryset.update
-        self.message_user(request, '{}건의 상품을 판매중단 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_unselling.short_description = '지정 상품을 판매중단 상태로 변경'
-
-    def make_hide(self, request, queryset):
-        updated_count = queryset.update(hide_product=True)  # queryset.update
-        self.message_user(request, '{}건의 상품을 시스템에서 숨김 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_hide.short_description = '지정 상품을 시스템에서 숨김 상태로 변경'
-
-    def make_unhide(self, request, queryset):
-        updated_count = queryset.update(hide_product=False)  # queryset.update
-        self.message_user(request, '{}건의 상품을 시스템에서 숨김해제 상태로 변경'.format(updated_count))  # django message framework 활용
-    make_unhide.short_description = '지정 상품을 시스템에서 숨김해제 상태로 변경'
-
-
 class AccountSettingAdmin(admin.ModelAdmin):
     list_display = ['user', 'order_per_page']
     list_per_page = 100
 
-admin.site.register(Product, ProductAdmin)
-admin.site.register(Customer, CustomerAdmin)
+
 admin.site.register(Order, OrderAdmin)
 admin.site.register(AccountSetting, AccountSettingAdmin)
+admin.site.register(PhoneTag)
+admin.site.register(ProductTag)

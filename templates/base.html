@@ -62,7 +62,7 @@
         $("#btn_search").on('click', function () {
             $("#customer_name").val($(".customer_name").val());
             $("#customer_phone").val($(".customer_phone").val());
-            $("#product_nickname_kr").val($(".product_nickname_kr").val());
+            $("#product").val($(".product").val());
             $("#order_receptionist").val($(".order_receptionist").val());
             $("#order_actor").val($(".order_actor").val());
             $("#Qstart").val($(".Qstart").val());
@@ -104,13 +104,6 @@
                     document.getElementById('check_confirm_watch').value = node.value;
                 } else {
                     document.getElementById('check_confirm_watch').value = '';
-                }
-            })
-            cBlack.forEach((node) => {
-                if(node.checked) {
-                    document.getElementById('check_blacklist').value = node.value;
-                } else {
-                    document.getElementById('check_blacklist').value = '';
                 }
             })
             $("#page").val(1);

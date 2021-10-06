@@ -27,7 +27,7 @@
                                 <div class="accordion-header" id="heading{{ forloop.counter }}">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
                                         <i class="las la-image" style="font-size: 32px"></i><br>
-                                        <b>&emsp;이미지 #{{ forloop.counter }}</b>
+                                        <b>&emsp;Ảnh sản phẩm #{{ forloop.counter }}</b>
                                     </button>
                                 </div>
                                 <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionExample">
@@ -45,46 +45,46 @@
 
             <div id="Customerinfo">
                 <div class="row g-3 border-bottom pb-3 mb-3">
-                    <h5><strong>| 주문자 정보</strong></h5>
+                    <h5><strong>| Thông Tin Đặt Hàng</strong></h5>
                     <div class="col-12 col-md-12">
                         <div class="form-floating">
-                            <input class="form-control" list="customerOptions" name="phone" id="phone" placeholder="전화번호" value="{{ orderform.phone.value|join:", "|default_if_none:'' }}">
-                            <label for="phone">전화번호</label>
+                            <input class="form-control" list="customerOptions" name="phone" id="phone" placeholder="Số điện thoại" value="{{ orderform.phone.value|join:", "|default_if_none:'' }}">
+                            <label for="phone">Số điện thoại</label>
                         </div>
 
                     </div>
                     <div class="col-md-4">
                         <div class="form-floating">
-                            <input type="text" class="form-control" name="customer" id="customer" placeholder="주문자 이름" value="{{ orderform.customer.value|default_if_none:'' }}">
-                            <label for="name">주문자 이름</label>
+                            <input type="text" class="form-control" name="customer" id="customer" placeholder="Tên người mua hàng" value="{{ orderform.customer.value|default_if_none:'' }}">
+                            <label for="name">Tên người mua hàng</label>
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div class="form-floating">
-                            <input type="text" class="form-control" name="facebook_url" id="facebook_url" placeholder="페이스북 프로필 링크" value="{{ orderform.facebook_url.value|default_if_none:'' }}">
-                            <label for="facebook_url">페이스북 프로필 링크</label>
+                            <input type="text" class="form-control" name="facebook_url" id="facebook_url" placeholder="link facebook" value="{{ orderform.facebook_url.value|default_if_none:'' }}">
+                            <label for="facebook_url">link facebook</label>
                         </div>
                     </div>
                 </div>
                 <div class="row g-3 border-bottom pb-3 mb-3">
-                    <h6>주소</h6>
+                    <h6>Địa Chỉ</h6>
                     <div class="col-6 col-md-4">
-                        <input type="text" class="form-control" name="postcode" id="postcode" placeholder="우편번호" value="" disabled readonly>
+                        <input type="text" class="form-control" name="postcode" id="postcode" placeholder="số bưu điện" value="" disabled readonly>
                     </div>
                     <div class="col-6 col-md-4">
-                        <button type="button" class="btn btn-secondary" onclick="sample3_execDaumPostcode()">주소찾기</button>
+                        <button type="button" class="btn btn-secondary" onclick="sample3_execDaumPostcode()">FIND Địa Chỉ</button>
                     </div>
                     <div class="col-12">
-                        <input type="text" class="form-control" name="addr" id="addr" placeholder="주소" value="" disabled readonly>
+                        <input type="text" class="form-control" name="addr" id="addr" placeholder="Địa Chỉ nhà" value="" disabled readonly>
                     </div>
                     <div class="col-12 col-lg-6">
-                        <input type="text" class="form-control" name="detail_addr" id="detail_addr" placeholder="상세주소" value="">
+                        <input type="text" class="form-control" name="detail_addr" id="detail_addr" placeholder="Phòng- Tầng-Tòa -Tên công ty" value="">
                     </div>
                     <div class="col-12 col-lg-6">
-                        <input type="text" class="form-control" name="extra_addr" id="extra_addr" placeholder="참고항목" value="" disabled readonly>
+                        <input type="text" class="form-control" name="extra_addr" id="extra_addr" placeholder="Để hàng ở đâu" value="" disabled readonly>
                     </div>
                     <div class="col-12 col-lg-12">
-                        <input type="text" class="form-control" name="order_addr" id="order_addr" placeholder="주소 직접 입력" value="{{ orderform.order_addr.value|default_if_none:'' }}">
+                        <input type="text" class="form-control" name="order_addr" id="order_addr" placeholder="Địa Chỉ" value="{{ orderform.order_addr.value|default_if_none:'' }}">
                     </div>
                     <div id="addrwrap" class="mt-3 px-0" style="display:none;border:1px solid #ced4da;width:500px;height:300px;margin:5px 8px;position:relative;border-radius:.25rem">
                         <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
@@ -92,12 +92,12 @@
 
                 </div>
                 <div class="row g-3 border-bottom pb-3 mb-3">
-                    <h6>기타 정보</h6>
+                    <h6>Địa chỉ Khác</h6>
                     <div class="col-12 col-lg-4">
-                        <input type="text" class="form-control" name="bank_depositor" id="bank_depositor" placeholder="입금자(별도일 경우)" value="{{ orderform.bank_depositor.value|default_if_none:'' }}">
+                        <input type="text" class="form-control" name="bank_depositor" id="bank_depositor" placeholder="Tên người chuyển khoản" value="{{ orderform.bank_depositor.value|default_if_none:'' }}">
                     </div>
                     <div class="col-12 col-lg-8">
-                        <input type="text" class="form-control" name="bank_refund" id="bank_refund" placeholder="환불계좌(옵션)" value="{{ orderform.bank_refund.value|default_if_none:'' }}">
+                        <input type="text" class="form-control" name="bank_refund" id="bank_refund" placeholder="số tài khoản chuyển khoản lại" value="{{ orderform.bank_refund.value|default_if_none:'' }}">
                     </div>
                     <div class="col-12" style="display: none">
                         <div class="form-check form-check-inline">
@@ -112,44 +112,44 @@
 
             <!-- 주문정보 -->
             <div class="row g-3 border-bottom pb-3 my-3">
-                <h5><strong>| 주문 정보</strong></h5>
+                <h5><strong>| Thông tin liên quan đặt hàng</strong></h5>
                 <div class="col-12">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" name="confirm_transit" id="confirm_transit" value=1 {% if orderform.confirm_transit.value %} checked {% endif %}>
-                        <label class="form-check-label" for="confirm_transit">입금확인</label>
+                        <label class="form-check-label" for="confirm_transit">Xác Nhận Gửi tiền</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" name="confirm_cancel" id="confirm_cancel" value=1 {% if orderform.confirm_cancel.value %} checked {% endif %}>
-                        <label class="form-check-label" for="confirm_cancel">주문취소</label>
+                        <label class="form-check-label" for="confirm_cancel">Hủy Đơn hàng</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" name="confirm_watch" id="confirm_watch" value=1 {% if orderform.confirm_watch.value %} checked {% endif %}>
-                        <label class="form-check-label" for="confirm_watch">유의항목</label>
+                        <label class="form-check-label" for="confirm_watch">Hạng mục lưu ý</label>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input class="form-select" name="product" id="product" value="{{ orderform.product.value|join:", "|default_if_none:'' }}" required>
-                        <label for="product">상품명</label>
+                        <label for="product">Tên sản phẩm</label>
                     </div>
                 </div>
                 <div class="col-md-2 col-4">
                     <div class="form-floating">
-                        <input type="text" class="form-control" name="quantity" id="quantity" placeholder="개수" value="{{ orderform.quantity.value|default_if_none:'1' }}">
-                        <label for="quantity">개수</label>
+                        <input type="text" class="form-control" name="quantity" id="quantity" placeholder="Số Lượng" value="{{ orderform.quantity.value|default_if_none:'1' }}">
+                        <label for="quantity">Số Lượng</label>
                     </div>
                 </div>
                 <div class="col-md-4 col-8">
                     <div class="form-floating">
-                        <input type="text" class="form-control" name="size" id="size" placeholder="사이즈" value="{{ orderform.size.value|default_if_none:'' }}">
-                        <label for="size">사이즈</label>
+                        <input type="text" class="form-control" name="size" id="size" placeholder="Size" value="{{ orderform.size.value|default_if_none:'' }}">
+                        <label for="size">Size</label>
                     </div>
                 </div>
             </div>
             <div class="row g-3 border-bottom pb-3 mb-3">
-                <h6>참고정보</h6>
+                <h6>thông tin tham khảo</h6>
                 <div class="col-12">
-                    <input type="file" accept="image/*" class="form-control" name="imgs" id="imgs" placeholder="이미지파일" multiple>
+                    <input type="file" accept="image/*" class="form-control" name="imgs" id="imgs" placeholder="Ảnh mua hàng" multiple>
                 </div>
                 <div class="col-12"><div id="multiple-container"></div>
                     <div class="col-12">
@@ -159,14 +159,14 @@
 
                 <div class="col-12 visually-hidden">
                     <input type="text" class="form-control" name="buying_price" id="buying_price" placeholder="" value="{{ orderform.buying_price.value|default_if_none:'0' }}" readonly>
-                    <label for="buying_price">구매가</label>
+                    <label for="buying_price">Mua Hàng</label>
                     <input type="text" class="form-control" name="selling_price" id="selling_price" placeholder="" value="{{ orderform.selling_price.value|default_if_none:'0' }}" readonly>
-                    <label for="buying_price">판매가</label>
+                    <label for="buying_price">Bán Hàng</label>
                 </div>
 
 
                 <button type="submit" class="btn btn-lg btn-primary mb-5" id="save_btn">
-                    <i class="las la-save" style="font-size: 32px;"></i><br>저장하기
+                    <i class="las la-save" style="font-size: 32px;"></i><br>Lưu Lại
                 </button>
             </div>
             </div>

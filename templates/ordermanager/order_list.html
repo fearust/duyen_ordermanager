@@ -19,26 +19,11 @@
             </div>
             <div class="input-group input-group-sm pb-1">
                 <span class="input-group-text" id="addon-wrapping"><i class="las la-boxes" style="font-size: 1.2em"></i></span>
-                <input class="form-control product_nickname_kr" list="productOptions" placeholder="제품명" value="{{ product_nickname_kr|default_if_none:'' }}">
-                <datalist id="productOptions">
-                    {% for choice in productdb %}
-                        <option value="{{ choice.nickname_kr }}">({{ choice.name_kr }})</option>
-                    {% endfor %}
-                </datalist>
+                <input class="form-control product" placeholder="제품명" value="{{ product|default_if_none:'' }}">
                 <span class="input-group-text" id="addon-wrapping"><i class="las la-user-astronaut" style="font-size: 1.2em"></i></span>
-                <input class="form-control order_receptionist" list="receptionistOptions" placeholder="접수자" value="{{ order_receptionist|default_if_none:'' }}">
-                <datalist id="receptionistOptions">
-                    {% for choice in userdb %}
-                        <option value="{{ choice.username }}">
-                    {% endfor %}
-                </datalist>
+                <input class="form-control order_receptionist" placeholder="접수자" value="{{ order_receptionist|default_if_none:'' }}">
                 <span class="input-group-text" id="addon-wrapping"><i class="las la-user-tag" style="font-size: 1.2em"></i></span>
-                <input class="form-control order_actor" list="actorOptions" placeholder="대행자" value="{{ order_actor|default_if_none:'' }}">
-                <datalist id="actorOptions">
-                    {% for choice in userdb %}
-                        <option value="{{ choice.username }}">
-                    {% endfor %}
-                </datalist>
+                <input class="form-control order_actor" placeholder="대행자" value="{{ order_actor|default_if_none:'' }}">
             </div>
 
             <div class="input-group input-group-sm pb-1">
@@ -89,10 +74,6 @@
                         <input class="form-check-input check_confirm_watch" type="checkbox" name="check_confirm_watch0" id="check_confirm_watch0" value=1>
                         <label class="form-check-label" for="check_confirm_watch0">유의건</label>
                     </div>
-                    <div class="form-check form-check-inline me-2">
-                        <input class="form-check-input check_blacklist" type="checkbox" name="check_blacklist0" id="check_blacklist0" value=1>
-                        <label class="form-check-label" for="check_blacklist0">Blacklist</label>
-                    </div>
                 </div>
                 <div class="col flex-fill btn-toolbar justify-content-end my-1">
                     <div class="btn-group m-1" role="group">
@@ -110,7 +91,7 @@
 
     <div class="row justify-content-between">
         <div class="col col-auto">
-            {% if customer_name or customer_phone or product_nickname_kr or order_receptionist or order_actor or Qstart or Qend or pkstart or pkend or check_confirm_transit or check_confirm_transit_cancel or check_confirm_cancel or check_confirm_watch or check_blacklist %}
+            {% if customer_name or customer_phone or product or order_receptionist or order_actor or Qstart or Qend or pkstart or pkend or check_confirm_transit or check_confirm_transit_cancel or check_confirm_cancel or check_confirm_watch or check_blacklist %}
                 <span id="searched">다음에 대한 검색결과:</span>
             {% endif %}
             {% if customer_name %}
@@ -119,8 +100,8 @@
             {% if customer_phone %}
                 <div class="badge bg-secondary mx-1">주문자 전화: {{ customer_phone }} </div>
             {% endif %}
-            {% if product_nickname_kr %}
-                <div class="badge bg-secondary mx-1">제품명: {{ product_nickname_kr }} </div>
+            {% if product %}
+                <div class="badge bg-secondary mx-1">제품명: {{ product }} </div>
             {% endif %}
             {% if order_receptionist %}
                 <div class="badge bg-secondary mx-1">접수자: {{ order_receptionist }} </div>
@@ -155,9 +136,6 @@
             {% endif %}
             {% if check_confirm_watch %}
                 <div class="badge bg-secondary mx-1">유의항목 </div>
-            {% endif %}
-            {% if check_blacklist %}
-                <div class="badge bg-secondary mx-1">블랙리스트 </div>
             {% endif %}
         </div>
         <div class="col-6 col-md-4 col-lg-3 my-1">
@@ -217,7 +195,7 @@
 <tbody>
     {% if order_list %}
         {% for order in order_list %}
-        <tr class="align-middle {% if order.confirm_watch %}table-danger{% elif not order.customer.name or not order.customer.phone %}table-warning{% endif %}" style="text-align: center;">
+        <tr class="align-middle {% if order.confirm_watch %}table-danger{% elif not order.customer or not order.phone.all|join:""|length %}table-warning{% endif %}" style="text-align: center;">
             <!-- 체크박스 -->
             <td>
                 <input class="form-check-input order_list_check" type="checkbox" name="order_list_check" id="order_list_check_{{ order.id }}" value="{{ order.id }}">
@@ -231,29 +209,31 @@
             <div class="m-0">
                 <div class="m-0" style="font-size: 0.8em;">
                     <p class="m-0">
-                        {% if order.customer.phone %}
-                            {{ order.customer.phone }}
+                        {% if order.phone.all|join:""|length > 0 %}
+                            {{ order.phone.all|join:", " }}
                         {% else %}
                             전화 <i class="las la-times"></i>
                         {% endif %} /
-                        {% if order.customer.name %}
-                        {{ order.customer.name }}
+                        {% if order.customer %}
+                        {{ order.customer }}
                         {% else %}
                             이름 <i class="las la-times"></i>
                         {% endif %} /
                         접수: {{ order.receptionist }}
                     </p>
                 </div>
-                <!--<span class="con_txt2">&emsp;</span><br> -->
-                <span class="con_txt2">{{ order.product.name_kr }} - </span>
-                <span><strong>{{ order.product.nickname_kr }}: {{ order.quantity }}개{% if order.size %}/{{ order.size }}{% endif %}</strong></span>
-                <!-- {% if order.receptionist_memo %}<span class="con_txt2"> ({{ order.receptionist_memo }})</span>{% endif %} -->
+
+                <span><strong>
+                    {% if order.product.all|join:""|length > 0 %}
+                        {{ order.product.all|join:", " }}
+                        :&nbsp;
+                    {% endif %}
+                    {{ order.quantity }}개{% if order.size %}/{{ order.size }}{% endif %}
+                </strong></span>
                 {% if order.confirm_cancel %}
-                    <!-- <span class="badge rounded-pill bg-danger"><i class="las la-ban" style="font-size: 1.6em"></i></span> -->
                     <i class="las la-ban text-danger" style="font-size: 1.2em"></i>
                 {% endif %}
                 {% if order.confirm_transit %}
-                    <!-- <span class="badge rounded-pill bg-success"><i class="las la-piggy-bank" style="font-size: 1.6em"></i></span> -->
                     <i class="las la-piggy-bank text-success" style="font-size: 1.2em"></i>
                 {% endif %}
                 {% if order.actor_set.count > 0 %}
@@ -269,17 +249,9 @@
             </div>
             </a>
             </td>
-            <!-- 주문일자/연락처/주문수정 -->
+            <!-- 주문일자/주문수정 -->
             <td>
                 <span style="color: gray; font-size: 0.8em">{{ order.order_date | date:'m/d H:i'}}</span><span class="con_txt2">&emsp;</span><br>
-                <!--
-                {% if order.customer.phone %}
-                    <a href="tel:{{ order.customer.phone }}"><i class="las la-phone-square" style="font-size: 1.6em"></i></a>
-                {% endif %}
-                {% if order.customer.facebook_url %}
-                    <a href="{{ order.customer.facebook_url }}" target="_blank"><i class="lab la-facebook-square" style="font-size: 1.6em"></i></a>
-                {% endif %}
-                -->
                 <a href="{% url 'ordermanager:order_modify' order.id %}"><i class="las la-edit" style="font-size: 1.6em"></i></a>
             </td>
         </tr>
@@ -301,7 +273,7 @@
 <form id="searchForm" method="get" action="{% url 'index' %}">
     <input type="hidden" id="customer_phone" name="customer_phone" value="{{ customer_phone|default_if_none:'' }}">
     <input type="hidden" id="customer_name" name="customer_name" value="{{ customer_name|default_if_none:'' }}">
-    <input type="hidden" id="product_nickname_kr" name="product_nickname_kr" value="{{ product_nickname_kr|default_if_none:'' }}">
+    <input type="hidden" id="product" name="product" value="{{ product_nickname_kr|default_if_none:'' }}">
     <input type="hidden" id="order_receptionist" name="order_receptionist" value="{{ order_receptionist|default_if_none:'' }}">
     <input type="hidden" id="order_actor" name="order_actor" value="{{ order_actor|default_if_none:'' }}">
     <input type="hidden" id="Qstart" name="Qstart" value="{{ Qstart|default_if_none:'' }}">

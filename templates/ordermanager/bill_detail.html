@@ -19,26 +19,11 @@
             </div>
             <div class="input-group input-group-sm pb-1">
                 <span class="input-group-text" id="addon-wrapping"><i class="las la-boxes" style="font-size: 1.2em"></i></span>
-                <input class="form-control product_nickname_kr" list="productOptions" placeholder="제품명" value="{{ product_nickname_kr|default_if_none:'' }}">
-                <datalist id="productOptions">
-                    {% for choice in productdb %}
-                        <option value="{{ choice.nickname_kr }}">({{ choice.name_kr }})</option>
-                    {% endfor %}
-                </datalist>
+                <input class="form-control product" placeholder="제품명" value="{{ product|default_if_none:'' }}">
                 <span class="input-group-text" id="addon-wrapping"><i class="las la-user-astronaut" style="font-size: 1.2em"></i></span>
-                <input class="form-control order_receptionist" list="receptionistOptions" placeholder="접수자" value="{{ order_receptionist|default_if_none:'' }}">
-                <datalist id="receptionistOptions">
-                    {% for choice in userdb %}
-                        <option value="{{ choice.username }}">
-                    {% endfor %}
-                </datalist>
+                <input class="form-control order_receptionist" placeholder="접수자" value="{{ order_receptionist|default_if_none:'' }}">
                 <span class="input-group-text" id="addon-wrapping"><i class="las la-user-tag" style="font-size: 1.2em"></i></span>
-                <input class="form-control order_actor" list="actorOptions" placeholder="대행자" value="{{ order_actor|default_if_none:'' }}">
-                <datalist id="actorOptions">
-                    {% for choice in userdb %}
-                        <option value="{{ choice.username }}">
-                    {% endfor %}
-                </datalist>
+                <input class="form-control order_actor" placeholder="대행자" value="{{ order_actor|default_if_none:'' }}">
             </div>
 
             <div class="input-group input-group-sm pb-1">
@@ -79,10 +64,6 @@
                         <input class="form-check-input check_confirm_watch" type="checkbox" name="check_confirm_watch0" id="check_confirm_watch0" value=1>
                         <label class="form-check-label" for="check_confirm_watch0">유의건</label>
                     </div>
-                    <div class="form-check form-check-inline me-2">
-                        <input class="form-check-input check_blacklist" type="checkbox" name="check_blacklist0" id="check_blacklist0" value=1>
-                        <label class="form-check-label" for="check_blacklist0">Blacklist</label>
-                    </div>
                 </div>
                 <div class="col flex-fill btn-toolbar justify-content-end my-1">
                     <div class="btn-group m-1" role="group">
@@ -99,10 +80,9 @@
     <div class="row">
         <div class="col">
             <div style="text-align: center; font-size: 1.6em;"><b>결산</b></div>
-            <!-- <div style="text-align: right;"><a href="">다운로드</a></div> -->
             <div class="row justify-content-between">
                 <div class="col col-auto">
-                    {% if customer_name or customer_phone or product_nickname_kr or order_receptionist or order_actor or Qstart or Qend or pkstart or pkend or check_confirm_transit or check_confirm_transit_cancel or check_confirm_cancel or check_confirm_watch or check_blacklist %}
+                    {% if customer_name or customer_phone or product or order_receptionist or order_actor or Qstart or Qend or pkstart or pkend or check_confirm_transit or check_confirm_transit_cancel or check_confirm_cancel or check_confirm_watch %}
                         <span id="searched">다음에 대한 검색결과:</span>
                     {% endif %}
                     {% if customer_name %}
@@ -111,8 +91,8 @@
                     {% if customer_phone %}
                         <div class="badge bg-secondary mx-1">주문자 전화: {{ customer_phone }} </div>
                     {% endif %}
-                    {% if product_nickname_kr %}
-                        <div class="badge bg-secondary mx-1">제품명: {{ product_nickname_kr }} </div>
+                    {% if product %}
+                        <div class="badge bg-secondary mx-1">제품명: {{ product }} </div>
                     {% endif %}
                     {% if order_receptionist %}
                         <div class="badge bg-secondary mx-1">접수자: {{ order_receptionist }} </div>
@@ -147,9 +127,6 @@
                     {% endif %}
                     {% if check_confirm_watch %}
                         <div class="badge bg-secondary mx-1">유의항목 </div>
-                    {% endif %}
-                    {% if check_blacklist %}
-                        <div class="badge bg-secondary mx-1">블랙리스트 </div>
                     {% endif %}
                 </div>
             </div>
@@ -247,13 +224,13 @@
         <tbody>
         {% if order_list %}
             {% for order in order_list %}
-                <tr class="align-middle" style="text-align: center;">
+                <tr class="align-middle" style="text-align: center;" onclick="location.href='{% url "ordermanager:order_detail" order.id %}'">
                     <td>{{ order.id }}</td>
                     <td>{% if order.order_date %}{{ order.order_date | date:"y/m/d"}}{% endif %}</td>
-                    <td>{% if order.customer.name %}{{ order.customer.name }}{% endif %}</td>
-                    <td>{% if order.customer.phone %}{{ order.customer.phone }}{% endif %}</td>
+                    <td>{% if order.customer %}{{ order.customer }}{% endif %}</td>
+                    <td>{% if order.phone.all|join:""|length > 0 %}{{ order.phone.all|join:", " }}{% endif %}</td>
                     <td class="con_txt2">{% if order.order_addr %}{{ order.order_addr }}{% endif %}</td>
-                    <td>{% if order.product.nickname_kr %}{{ order.product.nickname_kr }}{% endif %}</td>
+                    <td>{% if order.product.all|join:""|length > 0 %}{{ order.product.all|join:", " }}{% endif %}</td>
                     <td>{{ order.quantity }}</td>
                     <td>{% if order.size %}{{ order.size }}{% endif %}</td>
                     <td>{% if order.buying_price > 0 %}{{ order.buying_price }}{% endif %}</td>
@@ -276,7 +253,7 @@
     {% csrf_token %}
         <input type="hidden" id="customer_phone" name="customer_phone" value="{{ customer_phone|default_if_none:'' }}">
         <input type="hidden" id="customer_name" name="customer_name" value="{{ customer_name|default_if_none:'' }}">
-        <input type="hidden" id="product_nickname_kr" name="product_nickname_kr" value="{{ product_nickname_kr|default_if_none:'' }}">
+        <input type="hidden" id="product" name="product" value="{{ product|default_if_none:'' }}">
         <input type="hidden" id="order_receptionist" name="order_receptionist" value="{{ order_receptionist|default_if_none:'' }}">
         <input type="hidden" id="order_actor" name="order_actor" value="{{ order_actor|default_if_none:'' }}">
         <input type="hidden" id="Qstart" name="Qstart" value="{{ Qstart|default_if_none:'' }}">
@@ -285,7 +262,6 @@
         <input type="hidden" id="pkend" name="pkend" value="{{ pkend|default_if_none:'' }}">
         <input type="hidden" id="check_confirm_transit" name="check_confirm_transit" value="{{ check_confirm_transit }}">
         <input type="hidden" id="check_confirm_watch" name="check_confirm_watch" value="{{ check_confirm_watch }}">
-        <input type="hidden" id="check_blacklist" name="check_blacklist" value="{{ check_blacklist }}">
         <input type="hidden" id="page" name="page" value="{{ page }}">
     </form>
 
@@ -293,7 +269,7 @@
     {% csrf_token %}
         <input type="hidden" id="customer_phone_csv" name="customer_phone" value="{{ customer_phone|default_if_none:'' }}">
         <input type="hidden" id="customer_name_csv" name="customer_name" value="{{ customer_name|default_if_none:'' }}">
-        <input type="hidden" id="product_nickname_kr_csv" name="product_nickname_kr" value="{{ product_nickname_kr|default_if_none:'' }}">
+        <input type="hidden" id="product_csv" name="product" value="{{ product|default_if_none:'' }}">
         <input type="hidden" id="order_receptionist_csv" name="order_receptionist" value="{{ order_receptionist|default_if_none:'' }}">
         <input type="hidden" id="order_actor_csv" name="order_actor" value="{{ order_actor|default_if_none:'' }}">
         <input type="hidden" id="Qstart_csv" name="Qstart" value="{{ Qstart|default_if_none:'' }}">
@@ -302,7 +278,6 @@
         <input type="hidden" id="pkend_csv" name="pkend" value="{{ pkend|default_if_none:'' }}">
         <input type="hidden" id="check_confirm_transit_csv" name="check_confirm_transit" value="{{ check_confirm_transit }}">
         <input type="hidden" id="check_confirm_watch_csv" name="check_confirm_watch" value="{{ check_confirm_watch }}">
-        <input type="hidden" id="check_blacklist_csv" name="check_blacklist" value="{{ check_blacklist }}">
     </form>
 
     <div class="visually-hidden">
@@ -336,7 +311,7 @@
         $("#btn_bill_csv").on('click', function () {
             $("#customer_name_csv").val($(".customer_name").val());
             $("#customer_phone_csv").val($(".customer_phone").val());
-            $("#product_nickname_kr_csv").val($(".product_nickname_kr").val());
+            $("#product_csv").val($(".product").val());
             $("#order_receptionist_csv").val($(".order_receptionist").val());
             $("#order_actor_csv").val($(".order_actor").val());
             $("#Qstart_csv").val($(".Qstart").val());
@@ -365,7 +340,6 @@
             })
             const cCancel = document.getElementsByName('check_confirm_cancel0');
             const cWatch = document.getElementsByName('check_confirm_watch0');
-            const cBlack = document.getElementsByName('check_blacklist0');
             cCancel.forEach((node) => {
                 if(node.checked) {
                     document.getElementById('check_confirm_cancel').value = node.value;
@@ -378,13 +352,6 @@
                     document.getElementById('check_confirm_watch').value = node.value;
                 } else {
                     document.getElementById('check_confirm_watch').value = '';
-                }
-            })
-            cBlack.forEach((node) => {
-                if(node.checked) {
-                    document.getElementById('check_blacklist').value = node.value;
-                } else {
-                    document.getElementById('check_blacklist').value = '';
                 }
             })
             $("#csvForm").submit();

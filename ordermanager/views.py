@@ -9,26 +9,20 @@ from django.db.models import Q, Sum, Count
 from django.http import HttpResponse
 import json
 import csv
-import mimetypes
 from urllib import parse
 from django.core.serializers.json import DjangoJSONEncoder
-from ordermanager.models import Product, Order, OrderImage, Actor, AccountSetting, Customer
-from .forms import OrderForm, CustomerForm, ActorForm, OppForm
+from ordermanager.models import Order, OrderImage, Actor, AccountSetting, PhoneTag, ProductTag
+from .forms import OrderForm, ActorForm, OppForm
 
 
 @login_required(login_url='common:login')
 def manage_index(request):
-    userdb = User.objects.all()
-    productdb = Product.objects.exclude(hide_product=True)
-    # customerdb = Customer.objects.exclude(name=None)
-    # customerphonedb = Customer.objects.exclude(phone=None).distinct()
     current_user = request.user
-
 
     page = request.GET.get('page', '1')
     customer_phone = request.GET.get('customer_phone', '')
     customer_name = request.GET.get('customer_name', '')
-    product_nickname_kr = request.GET.get('product_nickname_kr', '')
+    product = request.GET.get('product', '')
     order_receptionist = request.GET.get('order_receptionist', '')
     order_actor = request.GET.get('order_actor', '')
     qstart = request.GET.get('Qstart', '')
@@ -39,16 +33,17 @@ def manage_index(request):
     check_confirm_transit_cancel = request.GET.get('check_confirm_transit_cancel', '')
     check_confirm_cancel = request.GET.get('check_confirm_cancel', '')
     check_confirm_watch = request.GET.get('check_confirm_watch', '')
-    check_blacklist = request.GET.get('check_blacklist', '')
 
     order_list = Order.objects.all().order_by('-confirm_watch', '-order_date', '-id')
 
     if customer_phone:
-        order_list = order_list.filter(Q(customer__phone__icontains=customer_phone)).distinct()
+        phone_search = PhoneTag.objects.filter(name__icontains=customer_phone).distinct()
+        order_list = order_list.filter(phone__in=phone_search).distinct()
     if customer_name:
-        order_list = order_list.filter(Q(customer__name__icontains=customer_name)).distinct()
-    if product_nickname_kr:
-        order_list = order_list.filter(Q(product__nickname_kr__icontains=product_nickname_kr)).distinct()
+        order_list = order_list.filter(Q(customer__icontains=customer_name)).distinct()
+    if product:
+        product_search = ProductTag.objects.filter(name__icontains=product).distinct()
+        order_list = order_list.filter(Q(product__in=product_search)).distinct()
     if order_receptionist:
         order_list = order_list.filter(Q(receptionist__username__icontains=order_receptionist)).distinct()
     if order_actor:
@@ -73,15 +68,13 @@ def manage_index(request):
         order_list = order_list.filter(Q(confirm_cancel=True)).distinct()
     if check_confirm_watch == '1':
         order_list = order_list.filter(Q(confirm_watch=True)).distinct()
-    if check_blacklist == '1':
-        order_list = order_list.filter(Q(customer__blacklist=True)).distinct()
 
     # 페이지당 오브젝트 갯수 설정
 
     object_per_page = 10
     oppsetting = 10
-    if request.user.is_authenticated and AccountSetting.objects.filter(user=request.user).exists():
-        object_per_page = AccountSetting.objects.get(user=request.user).order_per_page
+    if current_user.is_authenticated and AccountSetting.objects.filter(user=current_user).exists():
+        object_per_page = AccountSetting.objects.get(user=current_user).order_per_page
         oppsetting = object_per_page
     elif request.user.is_authenticated:
         account_setting_create = AccountSetting(user=request.user, order_per_page=10)
@@ -98,22 +91,18 @@ def manage_index(request):
         'order_list': page_obj,
         'page': page,
         'object_per_page': object_per_page,
-        'userdb': userdb,
-        'productdb': productdb,
         'customer_phone': customer_phone, 'customer_name': customer_name,
-        'product_nickname_kr': product_nickname_kr,
+        'product': product,
         'order_receptionist': order_receptionist, 'order_actor': order_actor,
         'Qstart': qstart, 'Qend': qend, 'pkstart': pkstart, 'pkend': pkend,
         'check_confirm_transit': check_confirm_transit,
         'check_confirm_transit_cancel': check_confirm_transit_cancel,
         'check_confirm_cancel': check_confirm_cancel,
         'check_confirm_watch': check_confirm_watch,
-        'check_blacklist': check_blacklist,
         'current_user': current_user,
         'oppsetting': oppsetting,
     }
-    ## 'customerdb': customerdb,
-    ## 'customerphonedb': customerphonedb,
+
 
     return render(request, 'ordermanager/order_list.html', context)
 
@@ -129,25 +118,27 @@ def order_detail(request, order_id):
 
 
 @login_required(login_url='common:login')
-def order_create(request):
-    # customerdb = Customer.objects.exclude(phone=None).distinct()
-    productdb = Product.objects.filter(Q(selling=True) & Q(hide_product=False))
-    if request.method == 'POST':
-        customerform = CustomerForm(request.POST)
-        orderform = OrderForm(request.POST)
-        product_name = request.POST.get('product', '')
-        product_id = Product.objects.get(name_kr=product_name)
+def order_detail_vn(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    buying_price = order.buying_price
+    selling_price = order.selling_price
+    buying_actor = order.buying_actor
+    context = {'order': order, 'buying_price': buying_price, 'selling_price': selling_price, 'buying_actor': buying_actor}
+    return render(request, 'ordermanager/order_detail_vn.html', context)
 
-        if customerform.is_valid() and orderform.is_valid():
-            customerquestion = customerform.save(commit=False)
-            customerquestion.save()
+
+@login_required(login_url='common:login')
+def order_create(request):
+
+    if request.method == 'POST':
+        orderform = OrderForm(request.POST)
+
+        if orderform.is_valid():
             orderquestion = orderform.save(commit=False)
-            orderquestion.product = product_id
-            orderquestion.customer = customerquestion
             orderquestion.order_date = timezone.now()
             orderquestion.receptionist = request.user
             orderquestion.save()
-
+            orderform.save_m2m()
             for img in request.FILES.getlist('imgs'):
                 photo = OrderImage()
                 photo.order = orderquestion
@@ -156,35 +147,51 @@ def order_create(request):
 
             return redirect('ordermanager:order_index')
     else:
-        customerform = CustomerForm()
         orderform = OrderForm()
-        product_name = ''
-    context = {'customerform': customerform, 'orderform': orderform, 'productdb': productdb, 'product_name': product_name}  # 'customerdb': customerdb, 제외
+    context = {'orderform': orderform}
     return render(request, 'ordermanager/order_form.html', context)
 
 
 @login_required(login_url='common:login')
+def order_create_vn(request):
+
+    if request.method == 'POST':
+        orderform = OrderForm(request.POST)
+
+        if orderform.is_valid():
+            orderquestion = orderform.save(commit=False)
+            orderquestion.order_date = timezone.now()
+            orderquestion.receptionist = request.user
+            orderquestion.save()
+            orderform.save_m2m()
+            for img in request.FILES.getlist('imgs'):
+                photo = OrderImage()
+                photo.order = orderquestion
+                photo.image = img
+                photo.save()
+
+            return redirect('ordermanager:receptionist')
+    else:
+        orderform = OrderForm()
+    context = {'orderform': orderform}
+    return render(request, 'ordermanager/order_form_vn.html', context)
+
+
+
+@login_required(login_url='common:login')
 def order_modify(request, order_id):
-    # customerdb = Customer.objects.exclude(phone=None).distinct()
-    productdb = Product.objects.filter(selling=True)
     order = get_object_or_404(Order, pk=order_id)
     if not request.user.is_staff:
         messages.error(request, '수정권한이 없습니다')
         return redirect('ordermanager:order_detail', order_id=order.id)
     if request.method == 'POST':
-        customerform = CustomerForm(request.POST, instance=order.customer)
         orderform = OrderForm(request.POST, instance=order)
-        product_name = request.POST.get('product', '')
-        product_id = Product.objects.get(name_kr=product_name)
-        if customerform.is_valid() and orderform.is_valid():
-            customerquestion = customerform.save(commit=False)
-            customerquestion.save()
+        if orderform.is_valid():
             orderquestion = orderform.save(commit=False)
-            orderquestion.product = product_id
-            orderquestion.customer = customerquestion
             orderquestion.modify_date = timezone.now()
             orderquestion.receptionist = request.user
             orderquestion.save()
+            orderform.save_m2m()
             for img in request.FILES.getlist('imgs'):
                 photo = OrderImage()
                 photo.order = orderquestion
@@ -192,11 +199,35 @@ def order_modify(request, order_id):
                 photo.save()
             return redirect('ordermanager:order_detail', order_id=order.id)
     else:
-        customerform = CustomerForm(instance=order.customer)
         orderform = OrderForm(instance=order)
-        product_name = order.product.name_kr
-    context = {'order': order, 'customerform': customerform, 'orderform': orderform, 'productdb': productdb, 'product_name': product_name}  # 'customerdb': customerdb, 제외
+    context = {'order': order, 'orderform': orderform}
     return render(request, 'ordermanager/order_form.html', context)
+
+
+@login_required(login_url='common:login')
+def order_modify_vn(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    if not request.user.is_staff:
+        messages.error(request, '수정권한이 없습니다')
+        return redirect('ordermanager:receptionist', order_id=order.id)
+    if request.method == 'POST':
+        orderform = OrderForm(request.POST, instance=order)
+        if orderform.is_valid():
+            orderquestion = orderform.save(commit=False)
+            orderquestion.modify_date = timezone.now()
+            orderquestion.receptionist = request.user
+            orderquestion.save()
+            orderform.save_m2m()
+            for img in request.FILES.getlist('imgs'):
+                photo = OrderImage()
+                photo.order = orderquestion
+                photo.image = img
+                photo.save()
+            return redirect('ordermanager:receptionist', order_id=order.id)
+    else:
+        orderform = OrderForm(instance=order)
+    context = {'order': order, 'orderform': orderform}
+    return render(request, 'ordermanager/order_form_vn.html', context)
 
 
 @login_required(login_url='common:login')
@@ -208,6 +239,18 @@ def order_delete(request, order_id):
         messages.error(request, '삭제권한이 없습니다')
         return redirect('ordermanager:order_detail', order_id=order.id)
     return redirect('ordermanager:order_index')
+
+
+@login_required(login_url='common:login')
+def order_delete_vn(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    if request.user == order.receptionist or request.user.is_superuser:
+        order.delete()
+    else:
+        messages.error(request, '삭제권한이 없습니다')
+        return redirect('ordermanager:order_detail_vn', order_id=order.id)
+    return redirect('ordermanager:receptionist')
+
 
 @login_required(login_url='common:login')
 def actor_create(request, order_id):
@@ -225,6 +268,24 @@ def actor_create(request, order_id):
         form = ActorForm()
     context = {'order': order, 'form': form, }
     return redirect('ordermanager:order_detail', context)
+
+
+@login_required(login_url='common:login')
+def actor_create_vn(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    if request.method == "POST":
+        form = ActorForm(request.POST)
+        if form.is_valid():
+            actor = form.save(commit=False)
+            actor.actor_date = timezone.now()
+            actor.actor = request.user
+            actor.order = order
+            actor.save()
+            return redirect('ordermanager:order_detail_vn', order_id=order.id)
+    else:
+        form = ActorForm()
+    context = {'order': order, 'form': form, }
+    return redirect('ordermanager:order_detail_vn', context)
 
 
 @login_required(login_url='common:login')
@@ -250,6 +311,28 @@ def actor_modify(request, actor_id):
 
 
 @login_required(login_url='common:login')
+def actor_modify_vn(request, actor_id):
+    actor = get_object_or_404(Actor, pk=actor_id)
+    if request.user == actor.actor or request.user.is_superuser:
+        pass
+    else:
+        messages.error(request, '수정권한이 없습니다')
+        return redirect('ordermanager:order_detail_vn', order_id=actor.order.id)
+
+    if request.method == "POST":
+        form = ActorForm(request.POST, instance=actor)
+        if form.is_valid():
+            actor = form.save(commit=False)
+            actor.modify_date = timezone.now()
+            actor.save()
+            return redirect('ordermanager:order_detail_vn', order_id=actor.order.id)
+    else:
+        form = ActorForm(instance=actor)
+    context = {'actor': actor, 'form': form}
+    return render(request, 'ordermanager/actor_form.html', context)
+
+
+@login_required(login_url='common:login')
 def actor_delete(request, actor_id):
     actor = get_object_or_404(Actor, pk=actor_id)
     if request.user == actor.actor or request.user.is_superuser:
@@ -259,6 +342,16 @@ def actor_delete(request, actor_id):
     return redirect('ordermanager:order_detail', order_id=actor.order.id)
 
 
+@login_required(login_url='common:login')
+def actor_delete_vn(request, actor_id):
+    actor = get_object_or_404(Actor, pk=actor_id)
+    if request.user == actor.actor or request.user.is_superuser:
+        actor.delete()
+    else:
+        messages.error(request, '삭제권한이 없습니다')
+    return redirect('ordermanager:order_detail_vn', order_id=actor.order.id)
+
+"""
 def phone_find(request):
     if request.method == 'GET' and request.is_ajax():
         phone_id = request.GET.get('phone', None)
@@ -277,7 +370,7 @@ def product_find(request):
         return HttpResponse(data)
     else:
         return HttpResponse(json.dumps({'error': 'HTTP Method error'}))
-
+"""
 
 @login_required(login_url='common:login')
 def opp(request, user_id):
@@ -293,6 +386,8 @@ def opp(request, user_id):
 
     return render(request, 'ordermanager/order_list.html')
 
+
+# 한번에 다량의 주문상태 변경
 @login_required(login_url='common:login')
 def order_list_bulkedit(request):
     if request.method == "POST":
@@ -313,6 +408,8 @@ def order_list_bulkedit(request):
                 for_change.update(confirm_cancel=False)
     return redirect(request.META['HTTP_REFERER'])
 
+
+# order_detail 에서 상품 구매가와 판매가 변경
 @login_required(login_url='common:login')
 def price_update(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -322,6 +419,10 @@ def price_update(request, order_id):
     if request.method == "POST":
         buying_price = request.POST.get('buying_price', '')
         selling_price = request.POST.get('selling_price', '')
+        if buying_price == '':
+            buying_price = 0
+        if selling_price == '':
+            selling_price = 0
         order.buying_price = buying_price
         order.selling_price = selling_price
         order.buying_actor = request.user
@@ -329,6 +430,7 @@ def price_update(request, order_id):
     return redirect(request.META['HTTP_REFERER'])
 
 
+# order_detail 에서 주문상태변경
 @login_required(login_url='common:login')
 def order_confirm_modify(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -357,20 +459,15 @@ def order_confirm_modify(request, order_id):
     return redirect(request.META['HTTP_REFERER'])
 
 
-
 @user_passes_test(lambda u: u.is_superuser)
 def bill_detail(request):
-    userdb = User.objects.all()
-    productdb = Product.objects.all()
-    # customerdb = Customer.objects.exclude(name=None)
-    # customerphonedb = Customer.objects.exclude(phone=None).distinct()
     current_user = request.user
     oppsetting = AccountSetting.objects.get(user=request.user).order_per_page
 
     page = request.GET.get('page', '1')
     customer_phone = request.GET.get('customer_phone', '')
     customer_name = request.GET.get('customer_name', '')
-    product_nickname_kr = request.GET.get('product_nickname_kr', '')
+    product = request.GET.get('product', '')
     order_receptionist = request.GET.get('order_receptionist', '')
     order_actor = request.GET.get('order_actor', '')
     qstart = request.GET.get('Qstart', '')
@@ -379,17 +476,18 @@ def bill_detail(request):
     pkend = request.GET.get('pkend', '')
     check_confirm_transit = request.GET.get('check_confirm_transit', '')
     check_confirm_watch = request.GET.get('check_confirm_watch', '')
-    check_blacklist = request.GET.get('check_blacklist', '')
 
     order_list = Order.objects.all().order_by('-order_date', '-id')
     order_list = order_list.exclude(confirm_cancel=True).distinct()
 
     if customer_phone:
-        order_list = order_list.filter(Q(customer__phone__icontains=customer_phone)).distinct()
+        phone_search = PhoneTag.objects.filter(name__icontains=customer_phone).distinct()
+        order_list = order_list.filter(phone__in=phone_search).distinct()
     if customer_name:
-        order_list = order_list.filter(Q(customer__name__icontains=customer_name)).distinct()
-    if product_nickname_kr:
-        order_list = order_list.filter(Q(product__nickname_kr__icontains=product_nickname_kr)).distinct()
+        order_list = order_list.filter(Q(customer__icontains=customer_name)).distinct()
+    if product:
+        product_search = ProductTag.objects.filter(name__icontains=product).distinct()
+        order_list = order_list.filter(Q(product__in=product_search)).distinct()
     if order_receptionist:
         order_list = order_list.filter(Q(receptionist__username__icontains=order_receptionist)).distinct()
     if order_actor:
@@ -408,8 +506,6 @@ def bill_detail(request):
         order_list = order_list.filter(Q(confirm_transit=False)).distinct()
     if check_confirm_watch == '1':
         order_list = order_list.filter(Q(confirm_watch=True)).distinct()
-    if check_blacklist == '1':
-        order_list = order_list.filter(Q(customer__blacklist=True)).distinct()
 
     benefit_byproduct_list = {}
     benefit_bydays_list = {}
@@ -419,15 +515,16 @@ def bill_detail(request):
 
     if order_list.exists():
 
-        for product in Product.objects.all():
+        for p in ProductTag.objects.all():
             try:
-                byproduct = order_list.filter(product__name_kr__icontains=product.name_kr)
+                product_search = ProductTag.objects.filter(name__icontains=p).distinct()
+                byproduct = order_list.filter(Q(product__in=product_search)).distinct()
                 byproduct_count = list(byproduct.aggregate(Count('pk')).values())[0]
                 byproduct_buying_sum = list(byproduct.aggregate(Sum('buying_price')).values())[0]
                 byproduct_selling_sum = list(byproduct.aggregate(Sum('selling_price')).values())[0]
                 byproduct_benefit_sum = byproduct_selling_sum - byproduct_buying_sum
                 if byproduct_count and byproduct_benefit_sum > 0:
-                    benefit_byproduct_list[product.name_kr] = (byproduct_count, byproduct_buying_sum, byproduct_selling_sum, byproduct_benefit_sum)
+                    benefit_byproduct_list[p.name] = (byproduct_count, byproduct_buying_sum, byproduct_selling_sum, byproduct_benefit_sum)
             except:
                 pass
 
@@ -468,41 +565,31 @@ def bill_detail(request):
     paginator = Paginator(order_list, object_per_page)
     page_obj = paginator.get_page(page)
 
-
-
     context = {
         'order_list': page_obj,
         'page': page,
         'object_per_page': object_per_page,
-        'userdb': userdb,
-        'productdb': productdb,
         'customer_phone': customer_phone, 'customer_name': customer_name,
-        'product_nickname_kr': product_nickname_kr,
+        'product': product,
         'order_receptionist': order_receptionist, 'order_actor': order_actor,
         'Qstart': qstart, 'Qend': qend, 'pkstart': pkstart, 'pkend': pkend,
         'check_confirm_transit': check_confirm_transit,
         'check_confirm_watch': check_confirm_watch,
-        'check_blacklist': check_blacklist,
         'current_user': current_user,
         'oppsetting': oppsetting,
         'benefit_byproduct_list': benefit_byproduct_list, 'benefit_bydays_list': benefit_bydays_list,
         'benefit_all_list': benefit_all_list,
         'order_list_firstday': order_list_firstday, 'order_list_lastday': order_list_lastday
     }
-    # 'customerdb': customerdb,
-    # 'customerphonedb': customerphonedb,
 
     return render(request, 'ordermanager/bill_detail.html', context)
 
 @user_passes_test(lambda u: u.is_superuser)
 def bill_csv(request):
-    userdb = User.objects.all()
-    productdb = Product.objects.all()
-    current_user = request.user
 
     customer_phone = request.POST.get('customer_phone', '')
     customer_name = request.POST.get('customer_name', '')
-    product_nickname_kr = request.POST.get('product_nickname_kr', '')
+    product = request.POST.get('product', '')
     order_receptionist = request.POST.get('order_receptionist', '')
     order_actor = request.POST.get('order_actor', '')
     qstart = request.POST.get('Qstart', '')
@@ -511,21 +598,22 @@ def bill_csv(request):
     pkend = request.POST.get('pkend', '')
     check_confirm_transit = request.POST.get('check_confirm_transit', '')
     check_confirm_watch = request.POST.get('check_confirm_watch', '')
-    check_blacklist = request.POST.get('check_blacklist', '')
 
     order_list = Order.objects.all().order_by('order_date', 'id')
     order_list = order_list.exclude(confirm_cancel=True).distinct()
 
-    filename_txt = ''
+    filename_txt = '결산_'
     if customer_phone:
-        order_list = order_list.filter(Q(customer__phone__icontains=customer_phone)).distinct()
+        phone_search = PhoneTag.objects.filter(name__icontains=customer_phone).distinct()
+        order_list = order_list.filter(phone__in=phone_search).distinct()
         filename_txt += ''.join(['전화(', customer_phone, ')_'])
     if customer_name:
         order_list = order_list.filter(Q(customer__name__icontains=customer_name)).distinct()
         filename_txt += ''.join(['이름(', customer_name, ')_'])
-    if product_nickname_kr:
-        order_list = order_list.filter(Q(product__nickname_kr__icontains=product_nickname_kr)).distinct()
-        filename_txt += ''.join(['상품명(', product_nickname_kr, ')_'])
+    if product:
+        product_search = ProductTag.objects.filter(name__icontains=product).distinct()
+        order_list = order_list.filter(Q(product__in=product_search)).distinct()
+        filename_txt += ''.join(['상품명(', product, ')_'])
     if order_receptionist:
         order_list = order_list.filter(Q(receptionist__username__icontains=order_receptionist)).distinct()
         filename_txt += ''.join(['접수자(', order_receptionist, ')_'])
@@ -553,9 +641,6 @@ def bill_csv(request):
     if check_confirm_watch == '1':
         order_list = order_list.filter(Q(confirm_watch=True)).distinct()
         filename_txt += ''.join(['유의건_'])
-    if check_blacklist == '1':
-        order_list = order_list.filter(Q(customer__blacklist=True)).distinct()
-        filename_txt += ''.join(['블랙리스트건_'])
 
     filename_txt += '.csv'
     filename_txt_utf8 = parse.quote(filename_txt.encode('utf-8'))
@@ -566,9 +651,11 @@ def bill_csv(request):
     writer = csv.writer(response)
     writer.writerow(['no', '일자', '주문자', '연락처', '주소', '항목', '수량', '사이즈', '구입가', '판매가'])
     for order in order_list:
+        phonetxt = ', '.join(phone.name for phone in order.phone.all())
+        producttxt = ', '.join(product.name for product in order.product.all())
         writer.writerow([
-            order.pk, order.order_date, order.customer.name, order.customer.phone, order.order_addr,
-            ''.join([order.product.name_kr, '(', order.product.nickname_kr, ')']),
+            order.pk, order.order_date, order.customer, phonetxt, order.order_addr,
+            producttxt,
             order.quantity, order.size, order.buying_price, order.selling_price
         ])
 
@@ -576,7 +663,6 @@ def bill_csv(request):
 
 @login_required(login_url='common:login')
 def receptionist(request):
-    productdb = Product.objects.filter(Q(selling=True) & Q(hide_product=False))
     page = request.GET.get('page', '1')
     current_user = request.user
     object_per_page = 10
@@ -585,21 +671,14 @@ def receptionist(request):
     page_obj = paginator.get_page(page)
 
     if request.method == 'POST':
-        customerform = CustomerForm(request.POST)
         orderform = OrderForm(request.POST)
-        product_name = request.POST.get('product', '')
-        product_id = Product.objects.get(name_kr=product_name)
 
-        if customerform.is_valid() and orderform.is_valid():
-            customerquestion = customerform.save(commit=False)
-            customerquestion.save()
+        if orderform.is_valid():
             orderquestion = orderform.save(commit=False)
-            orderquestion.product = product_id
-            orderquestion.customer = customerquestion
             orderquestion.order_date = timezone.now()
             orderquestion.receptionist = request.user
             orderquestion.save()
-
+            orderform.save_m2m()
             for img in request.FILES.getlist('imgs'):
                 photo = OrderImage()
                 photo.order = orderquestion
@@ -608,8 +687,7 @@ def receptionist(request):
 
             return redirect('ordermanager:receptionist')
     else:
-        customerform = CustomerForm()
         orderform = OrderForm()
 
-    context = {'order_list': page_obj, 'productdb': productdb, 'customerform': customerform, 'orderform': orderform}
-    return render(request, 'ordermanager/receptionist_list.html', context)
+    context = {'order_list': page_obj, 'orderform': orderform}
+    return render(request, 'ordermanager/receptionist_list_vn.html', context)
