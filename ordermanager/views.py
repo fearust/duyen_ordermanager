@@ -73,7 +73,7 @@ def manage_index(request):
 
     object_per_page = 10
     oppsetting = 10
-    if current_user.is_authenticated and AccountSetting.objects.filter(user=current_user).exists():
+    if current_user.is_authenticated and AccountSetting.objects.get(user=current_user).exists():
         object_per_page = AccountSetting.objects.get(user=current_user).order_per_page
         oppsetting = object_per_page
     elif request.user.is_authenticated:
